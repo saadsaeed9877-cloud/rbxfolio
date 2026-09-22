@@ -1,0 +1,92 @@
+# Environment
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Turbo
+.turbo/
+turbo.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+.jest-cache/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+.Thumbs.db
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+.prisma/
+
+# uploads
+uploads/
+media/
+
+# Local development
+.local/
+tmp/
+temp/
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# IDE settings
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+
+# Application specific
+.cache/
+.turbo/cache/
+
+# Electron
+dist_electron/
+
+# Next.js
+.next/
+out/
+
+# NestJS
+dist/

@@ -1,0 +1,9 @@
+# Railway deployment config for NestJS API
+[build]
+builder = "NIXPACKS"
+buildCommand = "pnpm install && pnpm --filter @rbxfolio/database generate && pnpm --filter @rbxfolio/api build"
+
+[deploy]
+startCommand = "node apps/api/dist/main.js"
+healthcheckPath = "/api/v1/featured"
+restartPolicyType = "ON_FAILURE"
