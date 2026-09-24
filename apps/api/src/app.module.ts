@@ -16,9 +16,6 @@ import { MediaModule } from "./media/media.module";
 import { ContactRequestsModule } from "./contact-requests/contact-requests.module";
 import { SearchModule } from "./search/search.module";
 import { SentryInterceptor } from "./common/sentry.interceptor";
-import { parseApiEnv } from "@rbxfolio/config";
-
-const env = parseApiEnv();
 
 @Module({
   imports: [
@@ -27,7 +24,7 @@ const env = parseApiEnv();
       { name: "contact", ttl: 3600000, limit: 5 },
     ]),
     ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), env.UPLOAD_DIR),
+      rootPath: join(process.cwd(), process.env.UPLOAD_DIR || "./uploads"),
       serveRoot: "/uploads",
     }),
     PrismaModule,

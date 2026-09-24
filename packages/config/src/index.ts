@@ -1,14 +1,15 @@
 import { z } from "zod";
 
+// Base schema - all fields optional for build-time compatibility
 const baseEnvSchema = z.object({
-  DATABASE_URL: z.string().url(),
-  BETTER_AUTH_SECRET: z.string().min(32),
+  DATABASE_URL: z.string().url().optional(),
+  BETTER_AUTH_SECRET: z.string().min(32).optional(),
 });
 
 export const webEnvSchema = baseEnvSchema.extend({
-  BETTER_AUTH_URL: z.string().url(),
-  NEXT_PUBLIC_API_URL: z.string().url(),
-  NEXT_PUBLIC_APP_URL: z.string().url(),
+  BETTER_AUTH_URL: z.string().url().optional(),
+  NEXT_PUBLIC_API_URL: z.string().url().optional(),
+  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   RESEND_API_KEY: z.string().optional(),
   RESEND_FROM_EMAIL: z.string().email().optional(),
 });
@@ -16,12 +17,21 @@ export const webEnvSchema = baseEnvSchema.extend({
 export const apiEnvSchema = baseEnvSchema.extend({
   PORT: z.coerce.number().default(3001),
   UPLOAD_DIR: z.string().default("./uploads"),
-  CORS_ORIGIN: z.string().url(),
+  CORS_ORIGIN: z.string().url().optional(),
   R2_ACCOUNT_ID: z.string().optional(),
   R2_ACCESS_KEY_ID: z.string().optional(),
   R2_SECRET_ACCESS_KEY: z.string().optional(),
   R2_BUCKET_NAME: z.string().optional(),
   R2_PUBLIC_URL: z.string().url().optional(),
+  BREVO_API_KEY: z.string().optional(),
+  BREVO_FROM_EMAIL: z.string().email().optional(),
+  BUNNY_STORAGE_ZONE: z.string().optional(),
+  BUNNY_API_KEY: z.string().optional(),
+  BUNNY_STORAGE_ENDPOINT: z.string().optional(),
+  SENTRY_DSN_API: z.string().optional(),
+  NEW_RELIC_LICENSE_KEY: z.string().optional(),
+  NEW_RELIC_APP_NAME: z.string().optional(),
+  NEW_RELIC_LOG_LEVEL: z.string().optional(),
 });
 
 export type WebEnv = z.infer<typeof webEnvSchema>;
