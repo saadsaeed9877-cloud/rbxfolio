@@ -251,16 +251,43 @@ pnpm db:push
 6. Save this - you'll need it in environment variables
 ```
 
-### 4.3: Verify Domain (Optional but recommended)
+### 4.3: Verify Sender Email (Two Options)
 
+**⚠️ IMPORTANT:** For production, you must verify an email address with Brevo.
+
+**OPTION A: Verify Your Personal Email (Faster)**
 ```
-1. Settings → Domains
+1. Brevo Dashboard → Settings → Senders
+2. Click "Add Sender"
+3. Enter your personal email: your-email@gmail.com
+4. Click "Add"
+5. Check your inbox for verification email
+6. Click the link in the email
+7. ✅ Your email is now verified!
+
+Use in .env.production:
+BREVO_FROM_EMAIL=your-email@gmail.com
+```
+
+**OPTION B: Verify Your Domain (Better for Production)**
+```
+1. Brevo Dashboard → Settings → Domains
 2. Click "Add Domain"
-3. Enter your domain (from Step 8: rbxfolio.tk)
-4. Add DNS records shown by Brevo
-5. Wait 24-48 hours for verification
-6. Once verified, use: noreply@rbxfolio.tk
+3. Enter your domain: rbxfolio.tk (from Step 8)
+4. Brevo shows DNS records to add
+5. Go to your domain registrar and add the records
+6. Wait 24-48 hours for DNS verification
+7. ✅ Your domain is now verified!
+
+Use in .env.production:
+BREVO_FROM_EMAIL=noreply@rbxfolio.tk
 ```
+
+**For now (local development):** Keep using `noreply@rbxfolio.local` in .env
+
+**For production:** Pick Option A (5 min) or Option B (5 min + 48 hrs)
+
+See: [EMAIL_CONFIGURATION.md](./EMAIL_CONFIGURATION.md) for detailed instructions
 
 **Status:** ✅ Brevo setup complete - email service ready
 
