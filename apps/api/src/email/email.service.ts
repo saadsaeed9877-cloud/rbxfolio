@@ -8,14 +8,25 @@ import { Resend } from 'resend';
 
 @Injectable()
 export class EmailService {
-  private resend: Resend;
+  private resend: Resend | null;
   private readonly logger = new Logger(EmailService.name);
 
   constructor() {
     if (!process.env.RESEND_API_KEY) {
       this.logger.warn('RESEND_API_KEY not configured - email service disabled');
+      this.resend = null;
+      return;
     }
-    this.resend = new Resend(process.env.RESEND_API_KEY);
+    try {
+      this.resend = new Resend(process.env.RESEND_API_KEY);
+    } catch (error) {
+      this.logger.error('Failed to initialize Resend', error);
+      this.resend = null;
+    }
+  }
+
+  private isEnabled(): boolean {
+    return this.resend !== null;
   }
 
   /**
@@ -26,10 +37,14 @@ export class EmailService {
     userName: string,
     token: string,
   ): Promise<void> {
+    if (!this.isEnabled()) {
+      this.logger.debug('Email service disabled - skipping verification email');
+      return;
+    }
     const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify?token=${token}`;
 
     try {
-      await this.resend.emails.send({
+      await this.resend!.emails.send({
         from: process.env.RESEND_FROM_EMAIL || 'noreply@rbxfolio.com',
         to: email,
         subject: 'Verify your RbxFolio account',
@@ -68,10 +83,14 @@ export class EmailService {
     userName: string,
     token: string,
   ): Promise<void> {
+    if (!this.isEnabled()) {
+      this.logger.debug('Email service disabled - skipping password reset email');
+      return;
+    }
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`;
 
     try {
-      await this.resend.emails.send({
+      await this.resend!.emails.send({
         from: process.env.RESEND_FROM_EMAIL || 'noreply@rbxfolio.com',
         to: email,
         subject: 'Reset your RbxFolio password',
@@ -110,10 +129,14 @@ export class EmailService {
     email: string,
     userName: string,
   ): Promise<void> {
+    if (!this.isEnabled()) {
+      this.logger.debug('Email service disabled - skipping welcome email');
+      return;
+    }
     const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
 
     try {
-      await this.resend.emails.send({
+      await this.resend!.emails.send({
         from: process.env.RESEND_FROM_EMAIL || 'noreply@rbxfolio.com',
         to: email,
         subject: 'Your RbxFolio account is ready!',
@@ -162,10 +185,14 @@ export class EmailService {
     message: string,
     requestId: string,
   ): Promise<void> {
+    if (!this.isEnabled()) {
+      this.logger.debug('Email service disabled - skipping contact request notification');
+      return;
+    }
     const inboxUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/contact-requests`;
 
     try {
-      await this.resend.emails.send({
+      await this.resend!.emails.send({
         from: process.env.RESEND_FROM_EMAIL || 'noreply@rbxfolio.com',
         to: developerEmail,
         subject: `New contact request from ${visitorName}`,
@@ -215,8 +242,12 @@ export class EmailService {
     visitorName: string,
     developerName: string,
   ): Promise<void> {
+    if (!this.isEnabled()) {
+      this.logger.debug('Email service disabled - skipping contact request confirmation');
+      return;
+    }
     try {
-      await this.resend.emails.send({
+      await this.resend!.emails.send({
         from: process.env.RESEND_FROM_EMAIL || 'noreply@rbxfolio.com',
         to: visitorEmail,
         subject: `Your message to ${developerName} was sent`,
@@ -257,8 +288,12 @@ export class EmailService {
     projectName: string,
     message: string,
   ): Promise<void> {
+    if (!this.isEnabled()) {
+      this.logger.debug('Email service disabled - skipping collaboration invite');
+      return;
+    }
     try {
-      await this.resend.emails.send({
+      await this.resend!.emails.send({
         from: process.env.RESEND_FROM_EMAIL || 'noreply@rbxfolio.com',
         to: email,
         subject: `${inviterName} invited you to collaborate on "${projectName}"`,
@@ -295,9 +330,12 @@ export class EmailService {
    * Health check - test email service connectivity
    */
   async healthCheck(): Promise<boolean> {
+    if (!this.isEnabled()) {
+      return false;
+    }
     try {
       // Test by sending a simple request
-      const response = await this.resend.emails.send({
+      const response = await this.resend!.emails.send({
         from: process.env.RESEND_FROM_EMAIL || 'noreply@rbxfolio.com',
         to: 'test@resend.dev', // Resend's test email
         subject: 'RbxFolio Health Check',

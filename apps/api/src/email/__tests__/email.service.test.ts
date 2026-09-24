@@ -31,7 +31,7 @@ describe('EmailService', () => {
 
   describe('sendVerificationEmail', () => {
     it('should send verification email with correct parameters', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendVerificationEmail(mockEmail, mockUserName, mockToken);
 
@@ -46,7 +46,7 @@ describe('EmailService', () => {
     });
 
     it('should include verification URL in email', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendVerificationEmail(mockEmail, mockUserName, mockToken);
 
@@ -55,7 +55,7 @@ describe('EmailService', () => {
     });
 
     it('should include user name in email body', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendVerificationEmail(mockEmail, mockUserName, mockToken);
 
@@ -64,7 +64,7 @@ describe('EmailService', () => {
     });
 
     it('should throw error if Resend API fails', async () => {
-      vi.spyOn(service['resend'].emails, 'send').mockRejectedValueOnce(
+      vi.spyOn((service['resend'] as any).emails, 'send').mockRejectedValueOnce(
         new Error('API Error')
       );
 
@@ -87,7 +87,7 @@ describe('EmailService', () => {
 
   describe('sendPasswordResetEmail', () => {
     it('should send password reset email with correct parameters', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendPasswordResetEmail(mockEmail, mockUserName, mockToken);
 
@@ -102,7 +102,7 @@ describe('EmailService', () => {
     });
 
     it('should include reset URL in email', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendPasswordResetEmail(mockEmail, mockUserName, mockToken);
 
@@ -111,7 +111,7 @@ describe('EmailService', () => {
     });
 
     it('should mention 1 hour expiration', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendPasswordResetEmail(mockEmail, mockUserName, mockToken);
 
@@ -120,7 +120,7 @@ describe('EmailService', () => {
     });
 
     it('should throw error if email sending fails', async () => {
-      vi.spyOn(service['resend'].emails, 'send').mockRejectedValueOnce(
+      vi.spyOn((service['resend'] as any).emails, 'send').mockRejectedValueOnce(
         new Error('Network error')
       );
 
@@ -132,7 +132,7 @@ describe('EmailService', () => {
 
   describe('sendWelcomeEmail', () => {
     it('should send welcome email with correct parameters', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendWelcomeEmail(mockEmail, mockUserName);
 
@@ -147,7 +147,7 @@ describe('EmailService', () => {
     });
 
     it('should include dashboard link', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendWelcomeEmail(mockEmail, mockUserName);
 
@@ -156,7 +156,7 @@ describe('EmailService', () => {
     });
 
     it('should include feature highlights', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendWelcomeEmail(mockEmail, mockUserName);
 
@@ -175,7 +175,7 @@ describe('EmailService', () => {
     const requestId = 'req-123';
 
     it('should send contact notification with all details', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendContactRequestNotification(
         developerEmail,
@@ -197,7 +197,7 @@ describe('EmailService', () => {
     });
 
     it('should include visitor name and email in notification', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendContactRequestNotification(
         developerEmail,
@@ -214,7 +214,7 @@ describe('EmailService', () => {
     });
 
     it('should include contact message', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendContactRequestNotification(
         developerEmail,
@@ -230,7 +230,7 @@ describe('EmailService', () => {
     });
 
     it('should include inbox link', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendContactRequestNotification(
         developerEmail,
@@ -247,7 +247,7 @@ describe('EmailService', () => {
 
     it('should handle multiline messages with line breaks', async () => {
       const multilineMessage = 'Line 1\nLine 2\nLine 3';
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendContactRequestNotification(
         developerEmail,
@@ -269,7 +269,7 @@ describe('EmailService', () => {
     const developerName = 'Jane Developer';
 
     it('should send confirmation email to visitor', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendContactRequestConfirmation(
         visitorEmail,
@@ -286,7 +286,7 @@ describe('EmailService', () => {
     });
 
     it('should not throw if email sending fails', async () => {
-      vi.spyOn(service['resend'].emails, 'send').mockRejectedValueOnce(
+      vi.spyOn((service['resend'] as any).emails, 'send').mockRejectedValueOnce(
         new Error('API Error')
       );
 
@@ -300,7 +300,7 @@ describe('EmailService', () => {
     });
 
     it('should include developer name in message', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendContactRequestConfirmation(
         visitorEmail,
@@ -321,7 +321,7 @@ describe('EmailService', () => {
     const message = 'I think you would be great for this project!';
 
     it('should send collaboration invitation', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendCollaborationInvite(
         email,
@@ -340,7 +340,7 @@ describe('EmailService', () => {
     });
 
     it('should include project name in subject', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendCollaborationInvite(
         email,
@@ -355,7 +355,7 @@ describe('EmailService', () => {
     });
 
     it('should include invitation message', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendCollaborationInvite(
         email,
@@ -372,7 +372,7 @@ describe('EmailService', () => {
 
   describe('healthCheck', () => {
     it('should return true if email service is healthy', async () => {
-      vi.spyOn(service['resend'].emails, 'send').mockResolvedValueOnce({
+      vi.spyOn((service['resend'] as any).emails, 'send').mockResolvedValueOnce({
         data: { id: 'health-check-123' },
         error: null,
       });
@@ -383,7 +383,7 @@ describe('EmailService', () => {
     });
 
     it('should return false if email service is down', async () => {
-      vi.spyOn(service['resend'].emails, 'send').mockRejectedValueOnce(
+      vi.spyOn((service['resend'] as any).emails, 'send').mockRejectedValueOnce(
         new Error('Connection refused')
       );
 
@@ -393,7 +393,7 @@ describe('EmailService', () => {
     });
 
     it('should use test@resend.dev for health check', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.healthCheck();
 
@@ -402,7 +402,7 @@ describe('EmailService', () => {
     });
 
     it('should not throw errors on health check failure', async () => {
-      vi.spyOn(service['resend'].emails, 'send').mockRejectedValueOnce(
+      vi.spyOn((service['resend'] as any).emails, 'send').mockRejectedValueOnce(
         new Error('API Error')
       );
 
@@ -423,7 +423,7 @@ describe('EmailService', () => {
 
     it('should log errors when email sending fails', async () => {
       const errorSpy = vi.spyOn(service['logger'], 'error');
-      vi.spyOn(service['resend'].emails, 'send').mockRejectedValueOnce(
+      vi.spyOn((service['resend'] as any).emails, 'send').mockRejectedValueOnce(
         new Error('API Error')
       );
 
@@ -439,7 +439,7 @@ describe('EmailService', () => {
 
   describe('template HTML formatting', () => {
     it('should generate valid HTML in verification email', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendVerificationEmail(mockEmail, mockUserName, mockToken);
 
@@ -451,7 +451,7 @@ describe('EmailService', () => {
     });
 
     it('should include proper styling in emails', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendVerificationEmail(mockEmail, mockUserName, mockToken);
 
@@ -461,7 +461,7 @@ describe('EmailService', () => {
     });
 
     it('should include call-to-action button styling', async () => {
-      const sendSpy = vi.spyOn(service['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((service['resend'] as any).emails, 'send');
 
       await service.sendVerificationEmail(mockEmail, mockUserName, mockToken);
 
