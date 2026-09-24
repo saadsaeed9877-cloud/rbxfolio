@@ -6,7 +6,8 @@
 
 # Dependencies
 node_modules/
-pnpm-lock.yaml
+# NOTE: pnpm-lock.yaml is committed to repo (needed for builds on Vercel/CI)
+# Only ignore yarn and npm lock files (choose one package manager)
 yarn.lock
 package-lock.json
 .pnpm-store/
