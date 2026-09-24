@@ -15,7 +15,8 @@ import { ProjectsModule } from "./projects/projects.module";
 import { MediaModule } from "./media/media.module";
 import { ContactRequestsModule } from "./contact-requests/contact-requests.module";
 import { SearchModule } from "./search/search.module";
-import { SentryInterceptor } from "./common/sentry.interceptor";
+import { LoggerService } from "./common/logger.service";
+import { LoggingInterceptor } from "./common/logging.interceptor";
 
 @Module({
   imports: [
@@ -36,13 +37,14 @@ import { SentryInterceptor } from "./common/sentry.interceptor";
     SearchModule,
   ],
   providers: [
+    LoggerService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: SentryInterceptor,
+      useClass: LoggingInterceptor,
     },
   ],
 })
