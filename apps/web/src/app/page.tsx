@@ -17,13 +17,11 @@ interface Developer {
 }
 
 export default async function HomePage() {
-  let featured: Developer[] = [];
-  try {
-    featured = await apiFetchServer<Developer[]>("/featured");
-  } catch {
-    featured = [];
-  }
-
+  // Don't fetch during build - featured developers will be empty
+  // This page will be ISR (incremental static regeneration)
+  // and will fetch at runtime instead
+  const featured: Developer[] = [];
+  
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
