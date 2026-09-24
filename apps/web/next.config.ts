@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
-const apiOrigin = new URL(apiUrl).origin;
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
+let apiOrigin = "http://localhost:3001";
+
+try {
+  apiOrigin = new URL(apiUrl).origin;
+} catch {
+  // If URL is invalid, use default origin
+  console.warn(`Invalid NEXT_PUBLIC_API_URL: ${apiUrl}, using default: ${apiOrigin}`);
+}
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@rbxfolio/types", "@rbxfolio/config", "@rbxfolio/database"],
