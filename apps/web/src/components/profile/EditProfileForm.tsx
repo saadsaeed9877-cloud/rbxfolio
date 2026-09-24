@@ -80,12 +80,16 @@ export function EditProfileForm({ onSuccess }: EditProfileFormProps) {
       if (!res.ok) throw new Error("Failed to load profile");
       return res.json();
     },
-    onSuccess: (data) => {
-      reset(data);
-      if (data.profilePictureUrl) setAvatarPreview(data.profilePictureUrl);
-      if (data.bannerUrl) setBannerPreview(data.bannerUrl);
-    },
   });
+
+  // Update preview when profile data loads
+  React.useEffect(() => {
+    if (profile) {
+      reset(profile);
+      if (profile.profilePictureUrl) setAvatarPreview(profile.profilePictureUrl);
+      if (profile.bannerUrl) setBannerPreview(profile.bannerUrl);
+    }
+  }, [profile, reset]);
 
   // Update profile mutation
   const updateProfileMutation = useMutation({

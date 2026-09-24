@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signUp } from "@/lib/auth-client";
+import { signUpWithEmail } from "@/lib/auth-client";
 import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
@@ -23,7 +23,7 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
 
-    const result = await signUp.email({ email, password, name });
+    const result = await signUpWithEmail(email, password, name);
     if (result.error) {
       setError(result.error.message ?? "Registration failed");
       setLoading(false);

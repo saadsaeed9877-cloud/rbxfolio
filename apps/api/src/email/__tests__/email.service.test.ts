@@ -374,6 +374,7 @@ describe('EmailService', () => {
     it('should return true if email service is healthy', async () => {
       vi.spyOn(service['resend'].emails, 'send').mockResolvedValueOnce({
         data: { id: 'health-check-123' },
+        error: null,
       });
 
       const isHealthy = await service.healthCheck();

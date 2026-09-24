@@ -16,12 +16,6 @@ export const authClient = createAuthClient({
  */
 export const {
   useSession,
-  useSignIn,
-  useSignOut,
-  useSignUp,
-  useForgotPassword,
-  useResetPassword,
-  useChangePassword,
 } = authClient;
 
 /**
@@ -35,11 +29,16 @@ export async function signUpWithEmail(
   password: string,
   name: string
 ) {
-  return authClient.signUp.email(
-    { email, password, name },
-    { onSuccess: () => window.location.href = "/dashboard" }
-  );
+  const result = await authClient.signUp.email({
+    email,
+    password,
+    name,
+  });
+  return result;
 }
+
+// Alias for backward compatibility
+export const signUp = signUpWithEmail;
 
 /**
  * Sign in with email/password
@@ -47,11 +46,15 @@ export async function signUpWithEmail(
  * @param password User's password
  */
 export async function signInWithEmail(email: string, password: string) {
-  return authClient.signIn.email(
-    { email, password },
-    { onSuccess: () => window.location.href = "/dashboard" }
-  );
+  const result = await authClient.signIn.email({
+    email,
+    password,
+  });
+  return result;
 }
+
+// Alias for backward compatibility
+export const signIn = signInWithEmail;
 
 /**
  * Sign in with OAuth provider
@@ -60,19 +63,16 @@ export async function signInWithEmail(email: string, password: string) {
 export async function signInWithOAuth(
   provider: "discord" | "github" | "google"
 ) {
-  return authClient.signIn.social(
-    { provider },
-    { onSuccess: () => window.location.href = "/dashboard" }
-  );
+  return authClient.signIn.social({
+    provider,
+  });
 }
 
 /**
  * Sign out current user
  */
 export async function signOut() {
-  return authClient.signOut({
-    fetchOptions: { onSuccess: () => window.location.href = "/login" },
-  });
+  return authClient.signOut();
 }
 
 /**

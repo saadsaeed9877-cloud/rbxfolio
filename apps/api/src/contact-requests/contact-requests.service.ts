@@ -44,7 +44,7 @@ export class ContactRequestsService {
       // Notify the developer
       await this.emailService.sendContactRequestNotification(
         profile.user.email,
-        profile.name || profile.username || "Developer",
+        profile.displayName || profile.username || "Developer",
         parsed.data.visitorName,
         "unknown@example.com", // Email from visitor would need to be added to schema if needed
         parsed.data.message,

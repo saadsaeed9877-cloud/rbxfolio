@@ -1,8 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ExecutionContext, CallHandler } from '@nestjs/common';
-import { of, throwError } from 'rxjs';
+import { of, throwError, Observable } from 'rxjs';
 import { SentryInterceptor } from '../sentry.interceptor';
 import * as Sentry from '@sentry/node';
+import { Mock } from 'vitest';
+
+// Type for errors with status code
+interface HttpError extends Error {
+  status?: number;
+}
 
 // Mock Sentry
 vi.mock('@sentry/node', () => ({
@@ -17,7 +23,7 @@ vi.mock('@sentry/node', () => ({
 describe('SentryInterceptor', () => {
   let interceptor: SentryInterceptor;
   let mockExecutionContext: ExecutionContext;
-  let mockCallHandler: CallHandler;
+  let mockCallHandler: { handle: Mock };
   let mockRequest: any;
 
   beforeEach(() => {
@@ -45,14 +51,14 @@ describe('SentryInterceptor', () => {
     } as any;
 
     mockCallHandler = {
-      handle: vi.fn(),
-    } as any;
+      handle: vi.fn() as Mock,
+    };
   });
 
   describe('intercept', () => {
     it('should pass through successful requests', async () => {
       const response = { statusCode: 200, data: 'success' };
-      mockCallHandler.handle.mockReturnValue(of(response));
+      mockCallHandler.handle.mockReturnValue(of(response) as Observable<any>);
 
       const result = await interceptor
         .intercept(mockExecutionContext, mockCallHandler)
@@ -62,9 +68,9 @@ describe('SentryInterceptor', () => {
     });
 
     it('should capture exceptions', async () => {
-      const error = new Error('Request failed');
+      const error: HttpError = new Error('Request failed');
       error.status = 500;
-      mockCallHandler.handle.mockReturnValue(throwError(() => error));
+      mockCallHandler.handle.mockReturnValue(throwError(() => error) as Observable<any>);
 
       try {
         await interceptor
@@ -78,9 +84,9 @@ describe('SentryInterceptor', () => {
     });
 
     it('should sanitize authorization header', async () => {
-      const error = new Error('Auth failed');
+      const error: HttpError = new Error('Auth failed');
       error.status = 401;
-      mockCallHandler.handle.mockReturnValue(throwError(() => error));
+      mockCallHandler.handle.mockReturnValue(throwError(() => error) as Observable<any>);
 
       try {
         await interceptor
@@ -91,17 +97,17 @@ describe('SentryInterceptor', () => {
       }
 
       const call = vi.mocked(Sentry.captureException).mock.calls[0];
-      const sentryOptions = call[1];
-      expect(sentryOptions.contexts.http.headers.authorization).toBe(
+      const sentryOptions = call[1] as Record<string, any>;
+      expect(sentryOptions?.contexts?.http?.headers?.authorization).toBe(
         '[REDACTED]'
       );
     });
 
     it('should sanitize password in body', async () => {
       mockRequest.body = { email: 'user@example.com', password: 'secret123' };
-      const error = new Error('Signup failed');
+      const error: HttpError = new Error('Signup failed');
       error.status = 400;
-      mockCallHandler.handle.mockReturnValue(throwError(() => error));
+      mockCallHandler.handle.mockReturnValue(throwError(() => error) as Observable<any>);
 
       try {
         await interceptor
@@ -112,14 +118,14 @@ describe('SentryInterceptor', () => {
       }
 
       const call = vi.mocked(Sentry.captureException).mock.calls[0];
-      const sentryOptions = call[1];
-      expect(sentryOptions.extra.body.password).toBe('[REDACTED]');
+      const sentryOptions = call[1] as Record<string, any>;
+      expect(sentryOptions?.extra?.body?.password).toBe('[REDACTED]');
     });
 
     it('should set correct tags on exception', async () => {
-      const error = new Error('Not found');
+      const error: HttpError = new Error('Not found');
       error.status = 404;
-      mockCallHandler.handle.mockReturnValue(throwError(() => error));
+      mockCallHandler.handle.mockReturnValue(throwError(() => error) as Observable<any>);
 
       try {
         await interceptor
@@ -130,15 +136,15 @@ describe('SentryInterceptor', () => {
       }
 
       const call = vi.mocked(Sentry.captureException).mock.calls[0];
-      const sentryOptions = call[1];
-      expect(sentryOptions.tags.http_method).toBe('GET');
-      expect(sentryOptions.tags.http_url).toBe('/api/users');
+      const sentryOptions = call[1] as Record<string, any>;
+      expect(sentryOptions?.tags?.http_method).toBe('GET');
+      expect(sentryOptions?.tags?.http_url).toBe('/api/users');
     });
 
     it('should include request context in exception', async () => {
-      const error = new Error('Database error');
+      const error: HttpError = new Error('Database error');
       error.status = 500;
-      mockCallHandler.handle.mockReturnValue(throwError(() => error));
+      mockCallHandler.handle.mockReturnValue(throwError(() => error) as Observable<any>);
 
       try {
         await interceptor
@@ -149,15 +155,15 @@ describe('SentryInterceptor', () => {
       }
 
       const call = vi.mocked(Sentry.captureException).mock.calls[0];
-      const sentryOptions = call[1];
-      expect(sentryOptions.extra.ip).toBe('127.0.0.1');
-      expect(sentryOptions.extra.params).toEqual({ id: '123' });
+      const sentryOptions = call[1] as Record<string, any>;
+      expect(sentryOptions?.extra?.ip).toBe('127.0.0.1');
+      expect(sentryOptions?.extra?.params).toEqual({ id: '123' });
     });
 
     it('should use error level for server errors', async () => {
-      const error = new Error('Internal error');
+      const error: HttpError = new Error('Internal error');
       error.status = 500;
-      mockCallHandler.handle.mockReturnValue(throwError(() => error));
+      mockCallHandler.handle.mockReturnValue(throwError(() => error) as Observable<any>);
 
       try {
         await interceptor
@@ -168,14 +174,14 @@ describe('SentryInterceptor', () => {
       }
 
       const call = vi.mocked(Sentry.captureException).mock.calls[0];
-      const sentryOptions = call[1];
-      expect(sentryOptions.level).toBe('error');
+      const sentryOptions = call[1] as Record<string, any>;
+      expect(sentryOptions?.level).toBe('error');
     });
 
     it('should rethrow original error', async () => {
-      const error = new Error('Original error');
+      const error: HttpError = new Error('Original error');
       error.status = 500;
-      mockCallHandler.handle.mockReturnValue(throwError(() => error));
+      mockCallHandler.handle.mockReturnValue(throwError(() => error) as Observable<any>);
 
       let caughtError: Error | null = null;
       try {
@@ -196,9 +202,9 @@ describe('SentryInterceptor', () => {
         'user-agent': 'Mozilla/5.0',
       };
 
-      const error = new Error('Error');
+      const error: HttpError = new Error('Error');
       error.status = 500;
-      mockCallHandler.handle.mockReturnValue(throwError(() => error));
+      mockCallHandler.handle.mockReturnValue(throwError(() => error) as Observable<any>);
 
       try {
         await interceptor
@@ -209,10 +215,11 @@ describe('SentryInterceptor', () => {
       }
 
       const call = vi.mocked(Sentry.captureException).mock.calls[0];
-      const headers = call[1].contexts.http.headers;
-      expect(headers['x-api-key']).toBe('[REDACTED]');
-      expect(headers['x-token']).toBe('[REDACTED]');
-      expect(headers['user-agent']).toBe('Mozilla/5.0');
+      const sentryOptions = call[1] as Record<string, any>;
+      const headers = sentryOptions?.contexts?.http?.headers;
+      expect(headers?.['x-api-key']).toBe('[REDACTED]');
+      expect(headers?.['x-token']).toBe('[REDACTED]');
+      expect(headers?.['user-agent']).toBe('Mozilla/5.0');
     });
   });
 });

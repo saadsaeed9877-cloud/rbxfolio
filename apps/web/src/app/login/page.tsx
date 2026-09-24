@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signIn } from "@/lib/auth-client";
+import { signInWithEmail } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +21,7 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const result = await signIn.email({ email, password });
+    const result = await signInWithEmail(email, password);
     if (result.error) {
       setError(result.error.message ?? "Login failed");
       setLoading(false);
