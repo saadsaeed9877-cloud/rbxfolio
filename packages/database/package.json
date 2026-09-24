@@ -9,7 +9,7 @@
     "migrate": "prisma migrate dev",
     "push": "prisma db push",
     "studio": "prisma studio",
-    "build": "tsc"
+    "build": "prisma generate && tsc"
   },
   "dependencies": {
     "@prisma/client": "^6.9.0"
