@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm install && pnpm build",
+  "buildCommand": "pnpm install --frozen-lockfile && pnpm build --filter=@rbxfolio/web",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs"
 }
