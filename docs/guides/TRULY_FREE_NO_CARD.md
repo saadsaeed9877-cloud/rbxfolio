@@ -15,7 +15,7 @@ RbxFolio MVP can run **completely free** without any credit card or debit card:
 | **Frontend** | Vercel | Vercel | ❌ No | $0 |
 | **Backend** | Railway | Render | ❌ No | $0 |
 | **Database** | PostgreSQL | Supabase | ❌ No | $0 |
-| **File Storage** | R2 | Imgur/Bunny | ❌ No | $0 |
+| **File Storage** | R2 | Local Filesystem | ❌ No | $0 |
 | **Email** | Resend | Brevo/Mailgun | ❌ No | $0 |
 | **Error Tracking** | Sentry | Sentry | ❌ No | $0 |
 | **Monitoring** | New Relic | New Relic | ❌ No | $0 |
@@ -160,96 +160,137 @@ psql "$DATABASE_URL" -c "SELECT 1"
 
 ---
 
-## 4. File Storage - Multiple Free Options
+## 4. File Storage - Local Filesystem (100% Free, No Card, No Setup)
 
-### Option A: Imgur (Simplest)
+### Why Local Filesystem?
 ```
-✅ 50GB free storage
-✅ Upload via web or API
-✅ No account required
-✅ No rate limits for MVP
-✅ No credit card
-
-Limitation: 
-❌ User avatars/media uploaded by users must be re-uploaded to Imgur
-```
-
-### Option B: Bunny CDN (Best Free Tier)
-```
-✅ 10GB storage free/month
-✅ Global CDN
-✅ Free forever
+✅ Completely free
 ✅ No credit card required
-
-Setup:
-1. Go to https://bunny.net
-2. Sign up (no card needed)
-3. Create storage zone
-4. Get API key
-5. Use with upload form
+✅ Already configured
+✅ No limits whatsoever
+✅ Perfect for MVP
+✅ Easy to migrate to cloud later
 ```
 
-**Implementation:**
+### Setup Steps
 
-```bash
-# Step 1: Sign up at https://bunny.net (free tier)
+**Step 0: No Setup Required!**
 
-# Step 2: Create storage zone
-# Dashboard → Storage → New Storage Zone
-# Name: rbxfolio-media
-# Region: Choose closest
+Local file storage is already configured. Files are automatically stored in `./uploads` directory.
 
-# Step 3: Get credentials
-# Storage Zone Name: rbxfolio-media
-# API Key: From account settings
+### File Organization
 
-# Step 4: Update backend environment
-BUNNY_STORAGE_ZONE=rbxfolio-media
-BUNNY_API_KEY=<your-api-key>
-BUNNY_STORAGE_ENDPOINT=rbxfolio-media.b-cdn.net
+```
+uploads/
+├── avatars/           # User profile pictures
+│   └── user-id.jpg
+├── banners/           # User banner images
+│   └── user-id.jpg
+└── projects/          # Project media
+    └── project-id/
+        ├── image-1.jpg
+        ├── image-2.jpg
+        └── video-1.mp4
 ```
 
-### Option C: Self-Hosted (Ultimate Free)
-```
-✅ Store files in GitHub repo
-✅ Serve via GitHub Pages (raw CDN)
-✅ Unlimited free storage
-✅ No card required
+### Usage in Development
 
-Limitation:
-- 25MB file size limit
-- Good for MVP (mostly text/small images)
+Files are automatically stored when users upload via the API:
+```
+POST /api/v1/users/me/avatar → Stores in uploads/avatars/
+POST /api/v1/users/me/banner → Stores in uploads/banners/
+POST /api/v1/users/me/projects/{id}/media → Stores in uploads/projects/{id}/
 ```
 
-**Implementation:**
+### Access Uploaded Files
 
-```typescript
-// Upload to GitHub repo via GitHub API
-import { Octokit } from "@octokit/rest";
-
-const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN,
-});
-
-async function uploadFile(file: Express.Multer.File) {
-  const filename = `${Date.now()}-${file.originalname}`;
-  
-  await octokit.repos.createOrUpdateFileContents({
-    owner: 'your-username',
-    repo: 'rbxfolio-media',
-    path: `uploads/${filename}`,
-    message: `Upload ${filename}`,
-    content: file.buffer.toString('base64'),
-  });
-
-  // Return GitHub raw URL
-  return `https://raw.githubusercontent.com/your-username/rbxfolio-media/main/uploads/${filename}`;
-}
+**In development:**
+```
+http://localhost:3001/uploads/avatars/filename.jpg
+http://localhost:3001/uploads/projects/project-id/image.jpg
 ```
 
-**Recommendation:** Use Bunny CDN (best balance of features and free tier)
+**In production:**
+```
+https://api.rbxfolio.tk/uploads/avatars/filename.jpg
+https://api.rbxfolio.tk/uploads/projects/project-id/image.jpg
+```
 
-**Status:** ✅ Free forever, no card required
+### Production Deployment
+
+When deploying to Render/Railway/production:
+
+**Configure persistent storage:**
+```
+1. Create a volume/disk in your hosting provider
+2. Mount it to: /var/app/uploads
+3. Set in .env.production:
+   UPLOAD_DIR=/var/app/uploads
+```
+
+**Example for Render:**
+```
+Render Dashboard → Select Service → Settings → Disks
+- Add disk (50GB free with service)
+- Mount path: /opt/render/project/src/uploads
+```
+
+### Future: Add CDN for Better Performance
+
+When you want to add a CDN later (still free):
+
+**Option A: Vercel Edge Network**
+```
+- Your Next.js frontend already uses Vercel
+- Serve images via image optimization endpoint
+- Free image optimization included
+```
+
+**Option B: Cloudflare Cache**
+```
+- Add Cloudflare in front of API
+- Cache images at edge
+- Free Cloudflare plan includes caching
+```
+
+**Option C: GitHub Pages (for static files)**
+```
+- Upload images to GitHub repo
+- Serve via raw.githubusercontent.com (free CDN)
+- 25MB file limit, good for MVP
+```
+
+### Cost Analysis
+
+**Local Storage:**
+- Setup time: 0 minutes
+- Monthly cost: $0
+- Annual cost: $0
+- Credit card needed: ❌ No
+- Unlimited growth: ✅ Yes (limited only by server disk)
+
+### Scaling Path
+
+**Year 1 MVP:**
+```
+Local storage on Render/Railway
+- Included disk space
+- Free tier
+- Perfect for testing
+```
+
+**Year 2+ (if needed):**
+```
+If storage needs grow:
+- AWS S3: Pay per GB used (~$0.023/GB)
+- Cloudflare R2: Pay per GB (~$0.015/GB, requires card)
+- DigitalOcean Spaces: $5/month for 250GB
+- Or keep local storage with larger disk
+
+None of these needed for MVP
+```
+
+**Status:** ✅ File storage completely configured, no card, no cost
 
 ---
 
@@ -476,10 +517,8 @@ BETTER_AUTH_URL=https://rbxfolio.tk
 CORS_ORIGIN=https://rbxfolio.tk
 PORT=3001
 
-# File Storage (Bunny CDN - free)
-BUNNY_STORAGE_ZONE=rbxfolio-media
-BUNNY_API_KEY=your-api-key-here
-BUNNY_STORAGE_ENDPOINT=rbxfolio-media.b-cdn.net
+# File Storage (Local - free forever!)
+UPLOAD_DIR=/var/app/uploads
 
 # Email (Brevo - free)
 BREVO_API_KEY=your-api-key-here
@@ -502,7 +541,7 @@ NEW_RELIC_APP_NAME=rbxfolio-api
 - [x] **Frontend Hosting** → Vercel (Free)
 - [x] **Backend API** → Render (Free)
 - [x] **Database** → Supabase (Free, 500MB)
-- [x] **File Storage** → Bunny CDN (Free, 10GB/month)
+- [x] **File Storage** → Local Filesystem (Free, Unlimited)
 - [x] **Email** → Brevo (Free, 300/day)
 - [x] **Error Tracking** → Sentry (Free, 5K/month)
 - [x] **APM Monitoring** → New Relic (Free, 1GB/month)
@@ -539,30 +578,30 @@ NEW_RELIC_APP_NAME=rbxfolio-api
 
 ### Monthly
 ```
-Vercel:        $0
-Render:        $0
-Supabase:      $0
-Bunny CDN:     $0 (within 10GB)
-Brevo:         $0 (within 300/day)
-Sentry:        $0
-New Relic:     $0
-Freenom:       $0
-Cloudflare:    $0
+Vercel:          $0
+Render:          $0
+Supabase:        $0
+Local Storage:   $0 (included)
+Brevo:           $0 (within 300/day)
+Sentry:          $0
+New Relic:       $0
+Freenom:         $0
+Cloudflare:      $0
 ─────────────────
 TOTAL:         $0/month
 ```
 
 ### Annual
 ```
-Vercel:        $0
-Render:        $0
-Supabase:      $0
-Bunny CDN:     $0
-Brevo:         $0
-Sentry:        $0
-New Relic:     $0
-Freenom:       $0 (free for 1 year, renewable free)
-Cloudflare:    $0
+Vercel:          $0
+Render:          $0
+Supabase:        $0
+Local Storage:   $0 (included)
+Brevo:           $0
+Sentry:          $0
+New Relic:       $0
+Freenom:         $0 (free for 1 year, renewable free)
+Cloudflare:      $0
 ─────────────────
 TOTAL:         $0/year ✅
 ```
@@ -578,7 +617,7 @@ TOTAL:         $0/year ✅
 | Hosting | Vercel | Vercel | Same ✅ |
 | Backend | Railway | Render | Render better (no card) |
 | Database | Railway | Supabase | Supabase better (no card) |
-| Storage | R2 | Bunny CDN | Bunny better (no card) |
+| Storage | R2 | Local Filesystem | Local Filesystem better (no card) |
 | Email | Resend | Brevo | Brevo better (no card) |
 | Errors | Sentry | Sentry | Same ✅ |
 | Monitoring | New Relic | New Relic | Same ✅ |
@@ -620,13 +659,13 @@ Total: $0/year
 
 ### Year 2+ (Optional Upgrades)
 ```
-If usage exceeds free tier:
-- Supabase: $25/month (upgraded tier)
-- Bunny CDN: $0.01/GB overage (generous)
-- Brevo: $20/month (more emails)
-- Custom domain: $10-15/year
+If storage needs grow beyond server disk:
+- AWS S3: $0.023/GB (~$23/TB)
+- Cloudflare R2: $0.015/GB (~$15/TB, requires card)
+- DigitalOcean Spaces: $5/month for 250GB
+- Or upgrade server disk on Render (~$5-50/month)
 
-Total: ~$50-60/month if you grow massively
+None of these needed for MVP or Year 1
 ```
 
 ---
@@ -692,7 +731,6 @@ Total: ~$50-60/month if you grow massively
    - Supabase (get database)
    - Render (get backend)
    - Brevo (get email)
-   - Bunny CDN (get storage)
    - Sentry (already have)
    - New Relic (already have)
    - Cloudflare (get DNS)

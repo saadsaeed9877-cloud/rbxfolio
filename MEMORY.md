@@ -19,7 +19,7 @@
 | 7 | Backend Integration Tests | ✅ COMPLETE | 9 | 50+ endpoint specs |
 | 8 | Frontend Component Tests | ✅ COMPLETE | 8 | 14+ tests active, 174 skipped (selector issues) |
 | 9 | E2E Tests | ✅ COMPLETE | 9 | 40+ Playwright specs |
-| 10 | Cloudflare R2 Configuration | ✅ COMPLETE | 5 | Bucket, IaC, docs |
+| 10 | File Storage Configuration | ✅ COMPLETE | 5 | Local filesystem, docs |
 | 11 | Resend Email Service | ✅ COMPLETE | 8 | Setup, service, 32 tests |
 | 12 | Sentry Error Tracking | ✅ COMPLETE | 6 | Setup, interceptor, 30 tests |
 | 13 | New Relic APM | ✅ COMPLETE | 6 | APM setup, 18 methods, 27 tests |
@@ -226,7 +226,7 @@ RbxFolio Roblox Developer Portfolio Platform MVP is fully implemented with:
    - Achieve 70%+ coverage
 
 3. **Configure Production Services** (10-15 hours)
-   - Cloudflare R2 for media storage
+   - Local file storage (no configuration needed)
    - Resend for email
    - Sentry for error tracking
    - New Relic for monitoring
@@ -252,7 +252,7 @@ RbxFolio Roblox Developer Portfolio Platform MVP is fully implemented with:
 - Frontend: Next.js 15, React 19, Tailwind CSS
 - Backend: NestJS, PostgreSQL, Prisma
 - Authentication: Better Auth
-- Media: Cloudflare R2
+- Media: Local filesystem with optional CDN overlay
 - Testing: Vitest, Supertest, Playwright
 
 **Database Schema:**
@@ -690,8 +690,8 @@ Use `MEMORY.md` to track ongoing development:
 
 **Storage Backends:**
 - **Development:** Local filesystem (./uploads/)
-- **Production:** Cloudflare R2 (cloud storage)
-- **Auto-detection:** Based on environment variables
+- **Production:** Local filesystem (./uploads or /var/app/uploads)
+- **Optional CDN:** Can add Vercel Image Optimization, Cloudflare Cache, or GitHub Pages later
 
 **File Organization:**
 - Avatars: `/uploads/avatars/{uuid}.{ext}`
@@ -1060,7 +1060,7 @@ cat packages/design-system/src/typography/README.md
 - New Relic (APM monitoring)
 - Sentry (error tracking)
 - PostgreSQL (query optimization)
-- Cloudflare R2 (image CDN)
+- Local filesystem (file storage)
 
 ### Next Steps
 - Task #15: Security Audit (OWASP Top 10, dependency scanning)
@@ -1623,7 +1623,7 @@ Over 120 hours of focused development, all deliverables met:
 
 3. **docs/SETUP_GUIDE_COMPLETE.md** (1,200+ lines) ✨ NEW
    - Step-by-step setup for ALL 12 services
-   - Detailed instructions for each service (Vercel, Supabase, Render, Brevo, Bunny, Sentry, New Relic, Freenom, Cloudflare)
+   - Detailed instructions for each service (Vercel, Supabase, Render, Brevo, Cloudflare R2, Sentry, New Relic, Freenom, Cloudflare)
    - Local development setup
    - Environment variables configuration (Step 11)
    - Deployment procedures (Step 12)
@@ -1668,7 +1668,7 @@ Over 120 hours of focused development, all deliverables met:
 | Railway Backend | Requires card | Render: Free (no card) |
 | PostgreSQL | Railway needs card | Supabase: Free (no card) |
 | Email | Resend $20/mo | Brevo: Free (no card) |
-| Storage | R2 $15+/mo | Bunny: Free (no card) |
+| Storage | R2 $15+/mo | Cloudflare R2: Free (10GB, no card) |
 | Domain | Paid | Freenom: Free (no card) |
 | **Cost** | $78+/month | **$0/month** |
 | **Card?** | Yes | **No!** |

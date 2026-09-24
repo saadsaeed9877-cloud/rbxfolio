@@ -14,7 +14,7 @@
 3. [Step 2: Database - Supabase](#step-2-database--supabase)
 4. [Step 3: Backend - Render](#step-3-backend--render)
 5. [Step 4: Email Service - Brevo](#step-4-email-service--brevo)
-6. [Step 5: File Storage - Bunny CDN](#step-5-file-storage--bunny-cdn)
+6. [Step 5: File Storage - Local Filesystem](#step-5-file-storage---local-filesystem)
 7. [Step 6: Error Tracking - Sentry](#step-6-error-tracking--sentry)
 8. [Step 7: APM Monitoring - New Relic](#step-7-apm-monitoring--new-relic)
 9. [Step 8: Domain - Freenom](#step-8-domain--freenom)
@@ -293,60 +293,83 @@ See: [EMAIL_CONFIGURATION.md](./EMAIL_CONFIGURATION.md) for detailed instruction
 
 ---
 
-## Step 5: File Storage - Bunny CDN
+## Step 5: File Storage - Local Filesystem (Completely Free)
 
-**Duration:** 10 minutes  
-**Cost:** $0 (10GB/month free)  
-**Card Required:** ❌ No
+**Duration:** 0 minutes (no setup needed!)  
+**Cost:** $0 (already included)  
+**Card Required:** ❌ No  
+**Why Local Storage:** Completely free, no limits, no cloud service needed
 
-### 5.1: Create Bunny Account
+### 5.1: No Setup Required
 
-```
-1. Go to: https://bunny.net
-2. Click "Sign Up" (no card needed)
-3. Enter email and create password
-4. Verify email
-5. ✅ You're in!
-```
+Local file storage is **already configured** in your backend. Files are stored in the `./uploads` directory.
 
-### 5.2: Create Storage Zone
+### 5.2: Directory Structure
 
 ```
-1. Bunny Dashboard → Storage
-2. Click "Add Storage Zone"
-3. Fill in:
-   - Name: rbxfolio-media
-   - Region: Choose closest to your location
-   - Replication: (keep default)
-4. Click "Create"
-5. Wait 30 seconds for zone to be created
+RbxFolio/
+├── uploads/                    # ← All uploaded files go here
+│   ├── avatars/
+│   │   └── user-123.jpg
+│   ├── banners/
+│   │   └── user-456.jpg
+│   └── projects/
+│       └── project-789/
+│           ├── image-1.jpg
+│           └── video-1.mp4
+├── apps/
+├── packages/
+└── ...
 ```
 
-### 5.3: Get API Credentials
+### 5.3: Development
 
-```
-1. Select your storage zone: rbxfolio-media
-2. Look for:
-   - Storage Zone Name: rbxfolio-media
-   - API Key: (copy from FTP & API section)
-3. Look at your account:
-   - Account Settings → Account
-   - AccessKey: (your API key)
-4. Save both values
-```
+Files are automatically stored in `./uploads` during development.
 
-### 5.4: Configure CDN
+**View uploaded files:**
+```bash
+# List all uploads
+ls -la uploads/
 
-```
-1. Select your storage zone → CDN
-2. Settings:
-   - Enable HTTPS: ✅ Yes
-   - Enable CDN: ✅ Yes
-   - Default CDN Hostname: rbxfolio-media.b-cdn.net
-3. You can also add your custom domain later
+# View an image
+open uploads/avatars/your-file.jpg
 ```
 
-**Status:** ✅ Bunny CDN setup complete - file storage ready
+### 5.4: Production Deployment
+
+When deploying to production (Render, Railway, etc.):
+
+**Option A: Volume Mount (Recommended)**
+```
+Configure your hosting provider to mount a persistent volume to /app/uploads
+Render: Settings → Disks → Add disk
+Bind path: /opt/render/project/src/uploads
+```
+
+**Option B: Absolute Path**
+```env
+# In .env.production on your server
+UPLOAD_DIR=/var/app/uploads
+```
+
+### 5.5: File Serving
+
+Files are automatically served via your API at:
+```
+http://localhost:3001/uploads/avatars/filename.jpg
+https://your-api.com/uploads/avatars/filename.jpg
+```
+
+### 5.6: Optional: Add a CDN Later
+
+If you want to serve files through a CDN later (for better performance):
+- Use GitHub Pages (free CDN for public files)
+- Use Vercel Edge Network (free with frontend)
+- Add Cloudflare in front (free CDN, requires card for R2 integration)
+
+**For now:** Local storage is perfect for MVP
+
+**Status:** ✅ File storage ready - completely free, no configuration needed!
 
 ---
 

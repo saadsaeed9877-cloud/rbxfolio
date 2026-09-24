@@ -29,10 +29,8 @@ CORS_ORIGIN=http://localhost:3000
 BREVO_API_KEY=SG.your_api_key_here
 BREVO_FROM_EMAIL=noreply@rbxfolio.local
 
-# FILE STORAGE (Bunny CDN)
-BUNNY_STORAGE_ZONE=rbxfolio-media
-BUNNY_API_KEY=your_bunny_api_key
-BUNNY_STORAGE_ENDPOINT=rbxfolio-media.b-cdn.net
+# FILE STORAGE (Local Filesystem - Free, No Setup)
+UPLOAD_DIR=./uploads
 
 # ERROR TRACKING (Sentry)
 SENTRY_DSN_API=https://your_key@domain.ingest.sentry.io/project_id
@@ -70,9 +68,8 @@ CORS_ORIGIN=https://rbxfolio.tk
 BREVO_API_KEY=SG.your_api_key_here
 BREVO_FROM_EMAIL=noreply@rbxfolio.tk
 
-# FILE STORAGE (Bunny - same as dev)
-BUNNY_STORAGE_ZONE=rbxfolio-media
-BUNNY_API_KEY=your_bunny_api_key
+# FILE STORAGE (Local Filesystem - same as dev)
+UPLOAD_DIR=/var/app/uploads
 BUNNY_STORAGE_ENDPOINT=rbxfolio-media.b-cdn.net
 
 # ERROR TRACKING (Sentry - same as dev)

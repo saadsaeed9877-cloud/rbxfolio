@@ -54,13 +54,12 @@ Go to: https://www.brevo.com
 - Copy API Key (BREVO_API_KEY)
 ```
 
-### 6️⃣ File Storage (5 min)
+### 6️⃣ File Storage (0 min - Already Done!)
 ```
-Go to: https://bunny.net
-- Sign up (no card!)
-- Create storage zone: rbxfolio-media
-- Get API Key
-- Get storage endpoint
+✅ Local storage already configured
+✅ Files go to ./uploads directory
+✅ No setup needed
+✅ Completely free
 ```
 
 ### 7️⃣ Error Tracking
@@ -103,10 +102,8 @@ BETTER_AUTH_URL=https://rbxfolio.tk
 CORS_ORIGIN=https://rbxfolio.tk
 PORT=3001
 
-# File Storage - from Bunny CDN
-BUNNY_STORAGE_ZONE=rbxfolio-media
-BUNNY_API_KEY=your-api-key-from-bunny
-BUNNY_STORAGE_ENDPOINT=rbxfolio-media.b-cdn.net
+# File Storage - Local (no setup needed!)
+UPLOAD_DIR=./uploads
 
 # Email - from Brevo
 BREVO_API_KEY=your-api-key-from-brevo
@@ -132,7 +129,7 @@ NEW_RELIC_LOG_LEVEL=info
 | Supabase | supabase.com | ✅ Yes | 5 min |
 | Render | render.com | ✅ Yes | 5 min |
 | Brevo | brevo.com | ✅ Yes | 5 min |
-| Bunny | bunny.net | ✅ Yes | 5 min |
+| Cloudflare | cloudflare.com | ✅ Yes | 5 min | ✅ Free Forever |
 | Sentry | sentry.io | ✅ Yes | ✅ Done |
 | New Relic | newrelic.com | ✅ Yes | ✅ Done |
 | Cloudflare | cloudflare.com | ✅ Yes | 5 min |
@@ -242,9 +239,9 @@ Add all variables from .env.production template
 - Solution: Copy API key again
 
 **Issue: "File upload fails"**
-- Check BUNNY_API_KEY is correct
-- Check storage zone created
-- Solution: Verify credentials in Bunny dashboard
+- Check ./uploads directory exists
+- Check write permissions on uploads folder
+- Solution: `mkdir -p ./uploads && chmod 755 ./uploads`
 
 ---
 
