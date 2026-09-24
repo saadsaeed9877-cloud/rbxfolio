@@ -1,0 +1,38 @@
+# Vercel build ignore file
+# Only needed when deploying non-web packages
+
+.git
+.gitignore
+README.md
+docs/
+*.md
+
+# Development files
+.env
+.env.local
+.env.*.local
+
+# Node modules (pnpm will reinstall)
+node_modules/
+
+# Build outputs (not needed on Vercel)
+apps/api/dist
+apps/api/.turbo
+packages/*/dist
+.turbo
+
+# Test files
+**/*.test.ts
+**/__tests__
+**/vitest.config.ts
+playwright.config.ts
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker-compose.override.yml
+
+# IDE
+.vscode
+.idea
+*.swp
