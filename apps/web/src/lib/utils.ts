@@ -16,10 +16,14 @@ export function getApiUrl(path: string) {
 export function getMediaUrl(url: string | null | undefined) {
   if (!url) return null;
   if (url.startsWith("http")) return url;
-  const apiOrigin = new URL(
-    process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1",
-  ).origin;
-  return `${apiOrigin}${url}`;
+  try {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
+    const apiOrigin = new URL(apiBase).origin;
+    return `${apiOrigin}${url}`;
+  } catch {
+    // If URL parsing fails, return the url as-is (fallback)
+    return url;
+  }
 }
 
 export function formatRole(role: string) {
