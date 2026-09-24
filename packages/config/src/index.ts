@@ -18,6 +18,8 @@ export const apiEnvSchema = baseEnvSchema.extend({
   PORT: z.coerce.number().default(3001),
   UPLOAD_DIR: z.string().default("./uploads"),
   CORS_ORIGIN: z.string().url().optional(),
+  BLOB_STORE_ID: z.string().optional(),
+  BLOB_READ_WRITE_TOKEN: z.string().optional(),
   R2_ACCOUNT_ID: z.string().optional(),
   R2_ACCESS_KEY_ID: z.string().optional(),
   R2_SECRET_ACCESS_KEY: z.string().optional(),
@@ -50,4 +52,8 @@ export function isR2Configured(env: ApiEnv): boolean {
       env.R2_BUCKET_NAME &&
       env.R2_PUBLIC_URL,
   );
+}
+
+export function isBlobConfigured(env: ApiEnv): boolean {
+  return Boolean(env.BLOB_READ_WRITE_TOKEN && env.BLOB_STORE_ID);
 }
