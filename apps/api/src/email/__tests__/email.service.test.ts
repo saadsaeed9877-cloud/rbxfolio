@@ -50,7 +50,7 @@ describe('EmailService', () => {
 
       await service.sendVerificationEmail(mockEmail, mockUserName, mockToken);
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain(`verify?token=${mockToken}`);
     });
 
@@ -59,7 +59,7 @@ describe('EmailService', () => {
 
       await service.sendVerificationEmail(mockEmail, mockUserName, mockToken);
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain(mockUserName);
     });
 
@@ -76,11 +76,11 @@ describe('EmailService', () => {
     it('should use default from email if not configured', async () => {
       delete process.env.RESEND_FROM_EMAIL;
       const newService = new EmailService();
-      const sendSpy = vi.spyOn(newService['resend'].emails, 'send');
+      const sendSpy = vi.spyOn((newService['resend'] as any).emails, 'send');
 
       await newService.sendVerificationEmail(mockEmail, mockUserName, mockToken);
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.from).toBe('noreply@rbxfolio.com');
     });
   });
@@ -106,7 +106,7 @@ describe('EmailService', () => {
 
       await service.sendPasswordResetEmail(mockEmail, mockUserName, mockToken);
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain(`reset-password?token=${mockToken}`);
     });
 
@@ -115,7 +115,7 @@ describe('EmailService', () => {
 
       await service.sendPasswordResetEmail(mockEmail, mockUserName, mockToken);
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain('1 hour');
     });
 
@@ -151,7 +151,7 @@ describe('EmailService', () => {
 
       await service.sendWelcomeEmail(mockEmail, mockUserName);
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain('/dashboard');
     });
 
@@ -160,7 +160,7 @@ describe('EmailService', () => {
 
       await service.sendWelcomeEmail(mockEmail, mockUserName);
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain('Create and showcase');
       expect(callArgs.html).toContain('Upload images and videos');
     });
@@ -208,7 +208,7 @@ describe('EmailService', () => {
         requestId
       );
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain(visitorName);
       expect(callArgs.html).toContain(visitorEmail);
     });
@@ -225,7 +225,7 @@ describe('EmailService', () => {
         requestId
       );
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain(message);
     });
 
@@ -241,7 +241,7 @@ describe('EmailService', () => {
         requestId
       );
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain('/dashboard/contact-requests');
     });
 
@@ -258,7 +258,7 @@ describe('EmailService', () => {
         requestId
       );
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain('<br />');
     });
   });
@@ -308,7 +308,7 @@ describe('EmailService', () => {
         developerName
       );
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain(developerName);
     });
   });
@@ -350,7 +350,7 @@ describe('EmailService', () => {
         message
       );
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.subject).toContain(projectName);
     });
 
@@ -365,7 +365,7 @@ describe('EmailService', () => {
         message
       );
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain(message);
     });
   });
@@ -397,7 +397,7 @@ describe('EmailService', () => {
 
       await service.healthCheck();
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.to).toBe('test@resend.dev');
     });
 
@@ -443,7 +443,7 @@ describe('EmailService', () => {
 
       await service.sendVerificationEmail(mockEmail, mockUserName, mockToken);
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain('<html>');
       expect(callArgs.html).toContain('</html>');
       expect(callArgs.html).toContain('<body');
@@ -455,7 +455,7 @@ describe('EmailService', () => {
 
       await service.sendVerificationEmail(mockEmail, mockUserName, mockToken);
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain('font-family');
       expect(callArgs.html).toContain('color:');
     });
@@ -465,7 +465,7 @@ describe('EmailService', () => {
 
       await service.sendVerificationEmail(mockEmail, mockUserName, mockToken);
 
-      const callArgs = sendSpy.mock.calls[0][0];
+      const callArgs = sendSpy.mock.calls[0][0] as any;
       expect(callArgs.html).toContain('background: #007bff');
       expect(callArgs.html).toContain('color: white');
       expect(callArgs.html).toContain('padding:');
