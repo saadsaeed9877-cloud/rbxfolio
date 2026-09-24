@@ -1,7 +1,6 @@
 {
-  "buildCommand": "cd ../.. && pnpm install --frozen-lockfile && pnpm --filter @rbxfolio/database generate && pnpm build --filter=@rbxfolio/web",
-  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "outputDirectory": ".next",
-  "framework": "nextjs",
-  "root": "apps/web"
+  "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @rbxfolio/database generate && pnpm build --filter=@rbxfolio/web",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "outputDirectory": "apps/web/.next",
+  "framework": "nextjs"
 }
