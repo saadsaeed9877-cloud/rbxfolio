@@ -120,7 +120,7 @@ export function SearchBar() {
 
   return (
     <div ref={searchRef} className="relative w-full max-w-xs">
-      <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/[.04] px-3.5 py-2.5 text-white/35">
+      <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/[.04] px-3.5 py-2.5 text-white/35 transition-all focus-within:border-[#b7ff3c]/50 focus-within:bg-white/[.08]">
         <Search size={16} />
         <input
           type="text"
@@ -132,7 +132,6 @@ export function SearchBar() {
           aria-label="Search"
         />
         {loading && <Loader size={14} className="animate-spin text-white/50" />}
-        {!loading && <kbd className="rounded border border-white/10 px-1.5 py-0.5 text-[10px]">⌘K</kbd>}
       </div>
 
       {/* Dropdown Results */}

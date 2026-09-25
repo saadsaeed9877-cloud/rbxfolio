@@ -117,7 +117,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             aria-label="Notifications"
             className="ml-auto rounded-lg p-2 text-white/50 hover:bg-white/5 hover:text-white lg:ml-0"
           >
-            <Bell size={19} />
+            {!loading && user && <Bell size={19} />}
           </button>
 
           {!loading && user && (
