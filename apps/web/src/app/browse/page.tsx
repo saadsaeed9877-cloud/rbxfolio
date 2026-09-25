@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { PageHero, ProjectCard } from '@/components/design-system';
+import { getProjectPlaceholder } from '@/lib/placeholders';
 
 // Mock data - replace with real API calls
 const mockProjects = [
@@ -9,7 +10,7 @@ const mockProjects = [
     title: 'Neon District',
     creator: 'Maya Chen',
     role: '3D Artist',
-    image: 'https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=800&h=600&fit=crop',
+    image: getProjectPlaceholder('Neon District'),
     likes: '2.4k',
     views: '8.2k',
   },
@@ -17,7 +18,7 @@ const mockProjects = [
     title: 'Quantum Interface',
     creator: 'Alex Rodriguez',
     role: 'UI Designer',
-    image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=600&fit=crop',
+    image: getProjectPlaceholder('Quantum Interface'),
     likes: '1.8k',
     views: '5.6k',
   },
@@ -25,7 +26,7 @@ const mockProjects = [
     title: 'Pixel Paradise',
     creator: 'Jordan Lee',
     role: '3D Artist',
-    image: 'https://images.unsplash.com/photo-1552820728-8ac41f1ce891?w=800&h=600&fit=crop',
+    image: getProjectPlaceholder('Pixel Paradise'),
     likes: '3.1k',
     views: '9.4k',
   },
@@ -33,7 +34,7 @@ const mockProjects = [
     title: 'Crystal Caves',
     creator: 'Sam Ahmed',
     role: 'VFX Artist',
-    image: 'https://images.unsplash.com/photo-1555097462-c2dfc508fa1a?w=800&h=600&fit=crop',
+    image: getProjectPlaceholder('Crystal Caves'),
     likes: '2.8k',
     views: '7.1k',
   },
@@ -41,7 +42,7 @@ const mockProjects = [
     title: 'Cyber Nexus',
     creator: 'Riley Park',
     role: 'Scripter',
-    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=600&fit=crop',
+    image: getProjectPlaceholder('Cyber Nexus'),
     likes: '3.5k',
     views: '10.2k',
   },
@@ -49,7 +50,7 @@ const mockProjects = [
     title: 'Magic Realm',
     creator: 'Casey Morgan',
     role: '3D Artist',
-    image: 'https://images.unsplash.com/photo-1526374965328-7f5ae4e8b32f?w=800&h=600&fit=crop',
+    image: getProjectPlaceholder('Magic Realm'),
     likes: '2.2k',
     views: '6.9k',
   },

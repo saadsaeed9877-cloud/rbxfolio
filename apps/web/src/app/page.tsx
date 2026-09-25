@@ -13,6 +13,7 @@ import {
   ProjectCard,
   CreatorCard,
 } from '@/components/design-system';
+import { getProjectPlaceholder, getBannerPlaceholder } from '@/lib/placeholders';
 
 // Mock data - replace with real API calls
 const mockProjects = [
@@ -20,7 +21,7 @@ const mockProjects = [
     title: 'Neon District',
     creator: 'Maya Chen',
     role: '3D Artist',
-    image: 'https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=800&h=600&fit=crop',
+    image: getProjectPlaceholder('Neon District'),
     likes: '2.4k',
     views: '8.2k',
   },
@@ -28,7 +29,7 @@ const mockProjects = [
     title: 'Quantum Interface',
     creator: 'Alex Rodriguez',
     role: 'UI Designer',
-    image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=600&fit=crop',
+    image: getProjectPlaceholder('Quantum Interface'),
     likes: '1.8k',
     views: '5.6k',
   },
@@ -36,7 +37,7 @@ const mockProjects = [
     title: 'Pixel Paradise',
     creator: 'Jordan Lee',
     role: '3D Artist',
-    image: 'https://images.unsplash.com/photo-1552820728-8ac41f1ce891?w=800&h=600&fit=crop',
+    image: getProjectPlaceholder('Pixel Paradise'),
     likes: '3.1k',
     views: '9.4k',
   },
@@ -139,7 +140,7 @@ export default function HomePage() {
             <div className="absolute -inset-6 rounded-[2rem] bg-[#b7ff3c]/8 blur-3xl" />
             <div className="relative rotate-1 overflow-hidden rounded-3xl border border-white/15 bg-[#0d120f] p-2 shadow-2xl transition hover:rotate-0">
               <img
-                src="https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=800&h=600&fit=crop"
+                src={getProjectPlaceholder('Neon District')}
                 alt="Featured neon environment project"
                 className="aspect-[4/3] w-full rounded-[1.15rem] object-cover saturate-[.7]"
               />

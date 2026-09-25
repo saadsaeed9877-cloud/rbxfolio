@@ -11,6 +11,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { ProjectCard } from '@/components/design-system';
+import { getProjectPlaceholder, getBannerPlaceholder } from '@/lib/placeholders';
 
 // Mock profile data - replace with real API calls
 const mockProfile = {
@@ -37,15 +38,14 @@ const mockProfile = {
     rating: '4.9',
     response: '98%',
   },
-  bannerImage:
-    'https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=1200&h=300&fit=crop',
+  bannerImage: getBannerPlaceholder('Maya Chen'),
   avatarColor: 'bg-gradient-to-br from-emerald-300 to-cyan-700',
   projects: [
     {
       title: 'Neon District',
       creator: 'Maya Chen',
       role: '3D Artist',
-      image: 'https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=800&h=600&fit=crop',
+      image: getProjectPlaceholder('Neon District'),
       likes: '2.4k',
       views: '8.2k',
     },
@@ -53,7 +53,7 @@ const mockProfile = {
       title: 'Quantum Interface',
       creator: 'Maya Chen',
       role: 'UI Designer',
-      image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=600&fit=crop',
+      image: getProjectPlaceholder('Quantum Interface'),
       likes: '1.8k',
       views: '5.6k',
     },
