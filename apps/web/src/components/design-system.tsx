@@ -20,6 +20,7 @@ import {
   X,
   Zap,
 } from 'lucide-react';
+import { SearchBar } from './search-bar';
 
 // Color scheme from Design folder
 export const COLORS = {
@@ -108,15 +109,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <div className="ml-auto hidden w-full max-w-xs items-center gap-2 rounded-xl border border-white/8 bg-white/[.04] px-3.5 py-2.5 text-white/35 lg:flex">
-            <Search size={16} />
-            <input
-              className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/30"
-              placeholder="Search creators, work, skills..."
-            />
-            <kbd className="rounded border border-white/10 px-1.5 py-0.5 text-[10px]">
-              ⌘K
-            </kbd>
+          <div className="ml-auto hidden lg:flex">
+            <SearchBar />
           </div>
 
           <button
