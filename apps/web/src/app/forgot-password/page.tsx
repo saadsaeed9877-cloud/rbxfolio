@@ -1,26 +1,29 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input, Label } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Header } from "@/components/header";
+import { useState } from 'react';
+import { CheckCircle } from 'lucide-react';
+import {
+  AuthLayout,
+  AuthCard,
+  AuthInput,
+  AuthButton,
+  AuthLink,
+} from '@/components/auth-layout';
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError('');
 
-    const res = await fetch("/api/auth/forget-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch('/api/auth/forget-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email,
         redirectTo: `${window.location.origin}/reset-password`,
@@ -29,7 +32,7 @@ export default function ForgotPasswordPage() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.message ?? "Failed to send reset email");
+      setError(data.message ?? 'Failed to send reset email');
       setLoading(false);
       return;
     }
@@ -39,43 +42,53 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex flex-1 items-center justify-center px-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Forgot password</CardTitle>
-            <CardDescription>We&apos;ll send you a reset link</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {sent ? (
-              <p className="text-sm text-muted-foreground">
-                If an account exists for {email}, a reset link has been sent.
-              </p>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Sending..." : "Send reset link"}
-                </Button>
-              </form>
-            )}
-            <p className="mt-4 text-center text-sm">
-              <Link href="/login" className="text-accent hover:underline">Back to sign in</Link>
+    <AuthLayout>
+      <AuthCard
+        title={sent ? 'Check your email' : 'Reset password'}
+        subtitle={
+          sent
+            ? 'We sent a password reset link to your email'
+            : "Enter your email and we'll send you a reset link"
+        }
+      >
+        {sent ? (
+          <div className="text-center">
+            <div className="mb-4 flex justify-center">
+              <div className="rounded-full bg-[#b7ff3c]/10 p-3">
+                <CheckCircle size={32} className="text-[#b7ff3c]" />
+              </div>
+            </div>
+            <p className="mb-6 text-sm text-white/65">
+              If an account exists for <strong>{email}</strong>, a password reset link has been sent to your email.
             </p>
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+            <AuthLink
+              text="Didn't receive it?"
+              link="Resend"
+              href="/forgot-password"
+            />
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <AuthInput
+              label="Email address"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={setEmail}
+              error={error}
+              required
+            />
+            <AuthButton type="submit" loading={loading}>
+              Send reset link
+            </AuthButton>
+            <AuthLink
+              text="Remember your password?"
+              link="Sign in"
+              href="/login"
+            />
+          </form>
+        )}
+      </AuthCard>
+    </AuthLayout>
   );
 }

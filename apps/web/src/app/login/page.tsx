@@ -1,86 +1,80 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { signInWithEmail } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
-import { Input, Label } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Header } from "@/components/header";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { signInWithEmail } from '@/lib/auth-client';
+import {
+  AuthLayout,
+  AuthCard,
+  AuthInput,
+  AuthButton,
+  AuthLink,
+} from '@/components/auth-layout';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError('');
 
     const result = await signInWithEmail(email, password);
     if (result.error) {
-      setError(result.error.message ?? "Login failed");
+      setError(result.error.message ?? 'Login failed');
       setLoading(false);
       return;
     }
 
-    router.push("/dashboard");
+    router.push('/dashboard');
     router.refresh();
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex flex-1 items-center justify-center px-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Sign in</CardTitle>
-            <CardDescription>Access your RbxFolio dashboard</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Signing in..." : "Sign in"}
-              </Button>
-            </form>
-            <p className="mt-4 text-center text-sm text-muted-foreground">
-              <Link href="/forgot-password" className="text-accent hover:underline">
-                Forgot password?
-              </Link>
-              {" · "}
-              No account?{" "}
-              <Link href="/register" className="text-accent hover:underline">
-                Register
-              </Link>
-            </p>
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+    <AuthLayout>
+      <AuthCard
+        title="Welcome back"
+        subtitle="Sign in to your RbxFolio portfolio"
+      >
+        <form onSubmit={handleSubmit}>
+          <AuthInput
+            label="Email address"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={setEmail}
+            error={error}
+            required
+          />
+          <AuthInput
+            label="Password"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={setPassword}
+            required
+          />
+          <AuthButton type="submit" loading={loading}>
+            Sign in
+          </AuthButton>
+        </form>
+        <div className="mt-6 flex flex-col gap-3 text-xs">
+          <AuthLink
+            text="Forgot your password?"
+            link="Reset it"
+            href="/forgot-password"
+          />
+          <AuthLink
+            text="Don't have an account?"
+            link="Create one"
+            href="/register"
+          />
+        </div>
+      </AuthCard>
+    </AuthLayout>
   );
 }

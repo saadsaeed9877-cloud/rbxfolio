@@ -1,149 +1,241 @@
-import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { ContactRequestForm } from "@/components/contact-request-form";
-import { Card, CardContent } from "@/components/ui/card";
-import { apiFetchServer } from "@/lib/api";
-import { formatRole, getMediaUrl } from "@/lib/utils";
+'use client';
 
-interface PublicProfile {
-  displayName: string;
-  username: string;
-  profilePictureUrl: string | null;
-  bannerUrl: string | null;
-  tagline: string | null;
-  bio: string | null;
-  primaryRole: string;
-  secondaryRoles: string[];
-  experienceLevel: string;
-  location: string | null;
-  languages: string[];
-  availability: string;
-  projects: {
-    id: string;
-    title: string;
-    slug: string;
-    shortDescription: string;
-    thumbnailUrl: string | null;
-    completionStatus: string;
-    tags: string[];
-  }[];
-}
+import { useState } from 'react';
+import Link from 'next/link';
+import {
+  BadgeCheck,
+  Heart,
+  MessageCircle,
+  MapPin,
+  Users,
+  Eye,
+} from 'lucide-react';
+import { ProjectCard } from '@/components/design-system';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ username: string }>;
-}): Promise<Metadata> {
-  const { username } = await params;
-  try {
-    const profile = await apiFetchServer<PublicProfile>(`/users/${username}`);
-    return {
-      title: `${profile.displayName} — Roblox ${formatRole(profile.primaryRole)}`,
-      description: profile.tagline ?? profile.bio ?? `${profile.displayName}'s Roblox portfolio`,
-    };
-  } catch {
-    return { title: "Profile not found" };
-  }
-}
+// Mock profile data - replace with real API calls
+const mockProfile = {
+  initials: 'MC',
+  name: 'Maya Chen',
+  handle: 'mayabuilds',
+  verified: true,
+  role: '3D Environment Artist',
+  bio: 'I build atmospheric worlds for Roblox experiences, with a focus on stylized lighting, modular environments, and spaces that tell a story before the player does anything.',
+  location: 'Toronto, Canada',
+  followers: '4.8k',
+  availability: 'Available for work',
+  following: false,
+  skills: [
+    'Blender',
+    'Roblox Studio',
+    'Substance',
+    'Lighting',
+    'Low-poly',
+    'Optimization',
+  ],
+  reputation: {
+    projects: '12',
+    rating: '4.9',
+    response: '98%',
+  },
+  bannerImage:
+    'https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=1200&h=300&fit=crop',
+  avatarColor: 'bg-gradient-to-br from-emerald-300 to-cyan-700',
+  projects: [
+    {
+      title: 'Neon District',
+      creator: 'Maya Chen',
+      role: '3D Artist',
+      image: 'https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=800&h=600&fit=crop',
+      likes: '2.4k',
+      views: '8.2k',
+    },
+    {
+      title: 'Quantum Interface',
+      creator: 'Maya Chen',
+      role: 'UI Designer',
+      image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=600&fit=crop',
+      likes: '1.8k',
+      views: '5.6k',
+    },
+  ],
+};
 
-export default async function PublicProfilePage({
-  params,
-}: {
-  params: Promise<{ username: string }>;
-}) {
-  const { username } = await params;
-  let profile: PublicProfile;
-  try {
-    profile = await apiFetchServer<PublicProfile>(`/users/${username}`);
-  } catch {
-    notFound();
-  }
-
-  const avatarUrl = getMediaUrl(profile.profilePictureUrl);
-  const bannerUrl = getMediaUrl(profile.bannerUrl);
+export default function PublicProfilePage() {
+  const [following, setFollowing] = useState(false);
+  const [tab, setTab] = useState('Work');
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1">
-        <div className="relative h-48 w-full bg-secondary sm:h-64">
-          {bannerUrl && (
-            <Image src={bannerUrl} alt="" fill className="object-cover" priority />
-          )}
+    <>
+      {/* Banner */}
+      <section className="relative h-48 overflow-hidden md:h-72">
+        <img
+          src={mockProfile.bannerImage}
+          alt="Profile banner"
+          className="h-full w-full object-cover opacity-50 saturate-50"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070a08] via-transparent to-black/30" />
+      </section>
+
+      {/* Profile Content */}
+      <section className="relative mx-auto max-w-[1180px] px-5">
+        <div className="-mt-16 flex flex-col gap-5 border-b border-white/8 pb-8 sm:flex-row sm:items-end">
+          <div
+            className={`grid size-28 shrink-0 place-items-center rounded-3xl border-4 border-[#070a08] ${mockProfile.avatarColor} font-display text-2xl font-black text-black shadow-xl`}
+          >
+            {mockProfile.initials}
+          </div>
+          <div className="flex-1 pb-1">
+            <div className="flex items-center gap-2">
+              <h1 className="font-display text-3xl font-bold">{mockProfile.name}</h1>
+              {mockProfile.verified && (
+                <BadgeCheck size={20} className="text-[#b7ff3c]" />
+              )}
+            </div>
+            <p className="mt-1 text-sm text-white/35">
+              @{mockProfile.handle} · {mockProfile.role}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button className="grid size-11 place-items-center rounded-xl border border-white/10 hover:bg-white/5">
+              <MessageCircle size={18} />
+            </button>
+            <button
+              onClick={() => setFollowing(!following)}
+              className={`rounded-xl px-5 text-sm font-bold transition ${
+                following
+                  ? 'bg-white/10 text-white'
+                  : 'bg-[#b7ff3c] text-black'
+              }`}
+            >
+              {following ? 'Following' : `Follow ${mockProfile.name.split(' ')[0]}`}
+            </button>
+          </div>
         </div>
-        <div className="mx-auto max-w-4xl px-4">
-          <div className="-mt-12 flex flex-col gap-4 sm:flex-row sm:items-end">
-            <div className="relative h-24 w-24 overflow-hidden rounded-full border-4 border-background bg-secondary">
-              {avatarUrl && <Image src={avatarUrl} alt={profile.displayName} fill className="object-cover" />}
-            </div>
-            <div className="flex-1 pb-2">
-              <h1 className="text-2xl font-bold">{profile.displayName}</h1>
-              <p className="text-muted-foreground">@{profile.username}</p>
-            </div>
-            <ContactRequestForm username={profile.username} />
-          </div>
 
-          {profile.tagline && (
-            <p className="mt-4 text-lg text-accent">{profile.tagline}</p>
-          )}
-
-          <div className="mt-6 flex flex-wrap gap-2">
-            <span className="rounded-full bg-primary/20 px-3 py-1 text-sm text-primary">
-              {formatRole(profile.primaryRole)}
-            </span>
-            {profile.secondaryRoles?.map((role) => (
-              <span key={role} className="rounded-full bg-secondary px-3 py-1 text-sm">
-                {formatRole(role)}
+        <div className="grid gap-10 py-10 lg:grid-cols-[1fr_300px]">
+          {/* Main Content */}
+          <div>
+            <p className="max-w-2xl text-base leading-7 text-white/65">
+              {mockProfile.bio}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-5 text-xs text-white/35">
+              <span className="flex items-center gap-1.5">
+                <MapPin size={14} />
+                {mockProfile.location}
               </span>
-            ))}
-            <span className="rounded-full border border-border px-3 py-1 text-sm">
-              {profile.experienceLevel.replace("_", " ").toLowerCase()}
-            </span>
-          </div>
+              <span className="flex items-center gap-1.5">
+                <Users size={14} />
+                <strong className="text-white">{mockProfile.followers}</strong> followers
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Eye size={14} />
+                {mockProfile.availability}
+              </span>
+            </div>
 
-          {profile.bio && (
-            <p className="mt-6 whitespace-pre-wrap text-muted-foreground">{profile.bio}</p>
-          )}
+            {/* Tabs */}
+            <div className="mt-10 flex gap-7 border-b border-white/8">
+              {['Work', 'About', 'Appreciations'].map((t) => (
+                <button
+                  onClick={() => setTab(t)}
+                  key={t}
+                  className={`border-b-2 pb-3 text-sm font-bold ${
+                    tab === t
+                      ? 'border-[#b7ff3c] text-white'
+                      : 'border-transparent text-white/35'
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
 
-          <section className="mt-12">
-            <h2 className="text-xl font-bold">Projects</h2>
-            {profile.projects.length === 0 ? (
-              <p className="mt-4 text-muted-foreground">No public projects yet.</p>
-            ) : (
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                {profile.projects.map((project) => {
-                  const thumb = getMediaUrl(project.thumbnailUrl);
-                  return (
-                    <Link key={project.id} href={`/u/${username}/projects/${project.slug}`}>
-                      <Card className="h-full transition-colors hover:border-accent/50">
-                        <div className="relative aspect-video overflow-hidden rounded-t-lg bg-secondary">
-                          {thumb && <Image src={thumb} alt={project.title} fill className="object-cover" />}
-                        </div>
-                        <CardContent className="p-4">
-                          <h3 className="font-semibold">{project.title}</h3>
-                          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                            {project.shortDescription}
-                          </p>
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {project.tags.map((tag) => (
-                              <span key={tag} className="rounded bg-secondary px-2 py-0.5 text-xs">{tag}</span>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  );
-                })}
+            {/* Tab Content */}
+            {tab === 'Work' && (
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                {mockProfile.projects.map((p) => (
+                  <ProjectCard key={p.title} project={p} />
+                ))}
               </div>
             )}
-          </section>
+            {tab === 'About' && (
+              <div className="mt-6 rounded-2xl border border-white/8 bg-[#0c110d] p-6 text-sm leading-7 text-white/50">
+                Maya has shipped environments for 12 Roblox experiences and
+                contributed to games with more than 80 million combined visits.
+                Her process spans blockout, modeling, UV work, texturing,
+                lighting, and in-Studio optimization.
+              </div>
+            )}
+            {tab === 'Appreciations' && (
+              <div className="mt-6 rounded-2xl border border-white/8 bg-[#0c110d] p-10 text-center text-sm text-white/40">
+                <Heart className="mx-auto mb-3 text-[#b7ff3c]" />
+                2,409 appreciations across Maya&apos;s work.
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <aside className="space-y-4">
+            <div className="rounded-2xl border border-white/8 bg-[#0c110d] p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="font-display font-bold">Open to work</h3>
+                <span className="size-2 rounded-full bg-[#b7ff3c] shadow-[0_0_8px_#b7ff3c]" />
+              </div>
+              <p className="text-xs leading-5 text-white/40">
+                Environment art, lighting, and world building for short or
+                long-term projects.
+              </p>
+              <button className="mt-5 w-full rounded-xl bg-[#b7ff3c] py-3 text-xs font-bold text-black hover:bg-[#c6ff65] transition">
+                Start a conversation
+              </button>
+            </div>
+
+            <div className="rounded-2xl border border-white/8 bg-[#0c110d] p-5">
+              <h3 className="font-display font-bold">Core skills</h3>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {mockProfile.skills.map((s) => (
+                  <span
+                    key={s}
+                    className="rounded-lg border border-white/8 px-2.5 py-1.5 text-[10px] text-white/45"
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-white/8 bg-[#0c110d] p-5">
+              <h3 className="font-display font-bold">Reputation</h3>
+              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                <span>
+                  <strong className="block text-lg">
+                    {mockProfile.reputation.projects}
+                  </strong>
+                  <small className="text-[9px] uppercase text-white/30">
+                    Projects
+                  </small>
+                </span>
+                <span>
+                  <strong className="block text-lg">
+                    {mockProfile.reputation.rating}
+                  </strong>
+                  <small className="text-[9px] uppercase text-white/30">
+                    Rating
+                  </small>
+                </span>
+                <span>
+                  <strong className="block text-lg">
+                    {mockProfile.reputation.response}
+                  </strong>
+                  <small className="text-[9px] uppercase text-white/30">
+                    Response
+                  </small>
+                </span>
+              </div>
+            </div>
+          </aside>
         </div>
-      </main>
-      <Footer />
-    </div>
+      </section>
+    </>
   );
 }

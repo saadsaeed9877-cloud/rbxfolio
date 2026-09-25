@@ -1,0 +1,10 @@
+{
+  "description": "Connect and showcase Roblox developers' profiles by role, allowing scripters, 3D artists, and UI designers to display their work in a sleek black and green theme.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

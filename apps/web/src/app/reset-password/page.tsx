@@ -1,79 +1,98 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { Suspense } from "react";
-import { authClient } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
-import { Input, Label } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Header } from "@/components/header";
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { authClient } from '@/lib/auth-client';
+import {
+  AuthLayout,
+  AuthCard,
+  AuthInput,
+  AuthButton,
+  AuthLink,
+} from '@/components/auth-layout';
 
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token") ?? "";
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const token = searchParams.get('token') ?? '';
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+    setError('');
 
-    const result = await authClient.resetPassword({ newPassword: password, token });
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+
+    if (!token) {
+      setError('Invalid or expired reset link');
+      return;
+    }
+
+    setLoading(true);
+
+    const result = await authClient.resetPassword({
+      newPassword: password,
+      token,
+    });
+
     if (result.error) {
-      setError(result.error.message ?? "Reset failed");
+      setError(result.error.message ?? 'Reset failed');
       setLoading(false);
       return;
     }
 
-    router.push("/login");
+    router.push('/login');
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Reset password</CardTitle>
-        <CardDescription>Enter your new password</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="password">New password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              minLength={8}
-              required
-            />
-          </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={loading || !token}>
-            {loading ? "Resetting..." : "Reset password"}
-          </Button>
-        </form>
-        <p className="mt-4 text-center text-sm">
-          <Link href="/login" className="text-accent hover:underline">Back to sign in</Link>
-        </p>
-      </CardContent>
-    </Card>
+    <AuthCard
+      title="Set new password"
+      subtitle="Create a strong password for your account"
+    >
+      <form onSubmit={handleSubmit}>
+        <AuthInput
+          label="New password"
+          type="password"
+          placeholder="••••••••"
+          value={password}
+          onChange={setPassword}
+          required
+        />
+        <AuthInput
+          label="Confirm password"
+          type="password"
+          placeholder="••••••••"
+          value={confirmPassword}
+          onChange={setConfirmPassword}
+          error={error}
+          required
+        />
+        <AuthButton type="submit" loading={loading || !token}>
+          Reset password
+        </AuthButton>
+      </form>
+      <AuthLink text="Remember your password?" link="Sign in" href="/login" />
+    </AuthCard>
   );
 }
 
 export default function ResetPasswordPage() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex flex-1 items-center justify-center px-4">
-        <Suspense fallback={<p>Loading...</p>}>
-          <ResetPasswordForm />
-        </Suspense>
-      </main>
-    </div>
+    <AuthLayout>
+      <Suspense fallback={<div className="text-center text-white/45">Loading...</div>}>
+        <ResetPasswordForm />
+      </Suspense>
+    </AuthLayout>
   );
 }

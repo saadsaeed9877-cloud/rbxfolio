@@ -1,83 +1,94 @@
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { DeveloperCard } from "@/components/developer-card";
-import { apiFetchServer } from "@/lib/api";
-import { formatRole } from "@/lib/utils";
-import Link from "next/link";
+'use client';
 
-interface BrowseResult {
-  data: {
-    username: string;
-    displayName: string;
-    tagline: string | null;
-    primaryRole: string;
-    profilePictureUrl: string | null;
-    availability: string;
-  }[];
-  pagination: { page: number; total: number; pages: number };
-}
+import { useState } from 'react';
+import { PageHero, ProjectCard } from '@/components/design-system';
 
-export default async function BrowsePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ sort?: string; role?: string; page?: string }>;
-}) {
-  const params = await searchParams;
-  const query = new URLSearchParams();
-  if (params.sort) query.set("sort", params.sort);
-  if (params.role) query.set("role", params.role);
-  if (params.page) query.set("page", params.page);
+// Mock data - replace with real API calls
+const mockProjects = [
+  {
+    title: 'Neon District',
+    creator: 'Maya Chen',
+    role: '3D Artist',
+    image: 'https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=800&h=600&fit=crop',
+    likes: '2.4k',
+    views: '8.2k',
+  },
+  {
+    title: 'Quantum Interface',
+    creator: 'Alex Rodriguez',
+    role: 'UI Designer',
+    image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=600&fit=crop',
+    likes: '1.8k',
+    views: '5.6k',
+  },
+  {
+    title: 'Pixel Paradise',
+    creator: 'Jordan Lee',
+    role: '3D Artist',
+    image: 'https://images.unsplash.com/photo-1552820728-8ac41f1ce891?w=800&h=600&fit=crop',
+    likes: '3.1k',
+    views: '9.4k',
+  },
+  {
+    title: 'Crystal Caves',
+    creator: 'Sam Ahmed',
+    role: 'VFX Artist',
+    image: 'https://images.unsplash.com/photo-1555097462-c2dfc508fa1a?w=800&h=600&fit=crop',
+    likes: '2.8k',
+    views: '7.1k',
+  },
+  {
+    title: 'Cyber Nexus',
+    creator: 'Riley Park',
+    role: 'Scripter',
+    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=600&fit=crop',
+    likes: '3.5k',
+    views: '10.2k',
+  },
+  {
+    title: 'Magic Realm',
+    creator: 'Casey Morgan',
+    role: '3D Artist',
+    image: 'https://images.unsplash.com/photo-1526374965328-7f5ae4e8b32f?w=800&h=600&fit=crop',
+    likes: '2.2k',
+    views: '6.9k',
+  },
+];
 
-  let result: BrowseResult = { data: [], pagination: { page: 1, total: 0, pages: 0 } };
-  try {
-    result = await apiFetchServer<BrowseResult>(`/browse?${query.toString()}`);
-  } catch {
-    // empty
-  }
+export default function BrowsePage() {
+  const [activeTab, setActiveTab] = useState('Trending');
 
-  const roles = ["BUILDER", "SCRIPTER", "UI_DESIGNER", "ANIMATOR", "MODELER", "VFX_ARTIST"];
+  const tabs = ['Trending', 'Latest', 'Most appreciated', 'Staff picks'];
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="mx-auto max-w-6xl flex-1 px-4 py-8">
-        <h1 className="text-2xl font-bold">Browse Developers</h1>
-
-        <div className="mt-6 flex flex-wrap gap-2">
-          <Link href="/browse" className={`rounded-full border px-3 py-1 text-sm ${!params.role ? "bg-primary text-primary-foreground" : ""}`}>
-            All
-          </Link>
-          {roles.map((role) => (
-            <Link
-              key={role}
-              href={`/browse?role=${role}${params.sort ? `&sort=${params.sort}` : ""}`}
-              className={`rounded-full border px-3 py-1 text-sm ${params.role === role ? "bg-primary text-primary-foreground" : ""}`}
+    <>
+      <PageHero
+        kicker="Community showcase"
+        title="Work worth pausing for."
+        copy="A live stream of environments, systems, interfaces, animation, audio, and effects from Roblox's sharpest creators."
+      />
+      <section className="mx-auto max-w-[1380px] px-5 py-10">
+        <div className="mb-8 flex gap-2 overflow-x-auto">
+          {tabs.map((item, i) => (
+            <button
+              key={item}
+              onClick={() => setActiveTab(item)}
+              className={`shrink-0 rounded-xl px-4 py-2.5 text-xs font-bold ${
+                activeTab === item
+                  ? 'bg-[#b7ff3c] text-black'
+                  : 'border border-white/8 text-white/45'
+              }`}
             >
-              {formatRole(role)}
-            </Link>
+              {item}
+            </button>
           ))}
         </div>
-
-        <div className="mt-4 flex gap-2">
-          <Link href={`/browse?sort=newest${params.role ? `&role=${params.role}` : ""}`} className={`text-sm ${params.sort !== "updated" ? "text-accent" : "text-muted-foreground"}`}>
-            Newest
-          </Link>
-          <Link href={`/browse?sort=updated${params.role ? `&role=${params.role}` : ""}`} className={`text-sm ${params.sort === "updated" ? "text-accent" : "text-muted-foreground"}`}>
-            Recently updated
-          </Link>
-        </div>
-
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {result.data.map((dev) => (
-            <DeveloperCard key={dev.username} developer={dev} />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {mockProjects.map((p, i) => (
+            <ProjectCard key={p.title} project={p} large={i === 0} />
           ))}
         </div>
-
-        {result.data.length === 0 && (
-          <p className="mt-8 text-center text-muted-foreground">No developers found.</p>
-        )}
-      </main>
-      <Footer />
-    </div>
+      </section>
+    </>
   );
 }
