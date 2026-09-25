@@ -1,93 +1,110 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ArrowRight,
   BadgeCheck,
   Heart,
   Sparkles,
+  Loader,
 } from 'lucide-react';
 import {
   SectionTitle,
   ProjectCard,
   CreatorCard,
 } from '@/components/design-system';
-import { getProjectPlaceholder, getBannerPlaceholder } from '@/lib/placeholders';
+import { getProjectPlaceholder } from '@/lib/placeholders';
+import { getFeaturedDevelopers, browseProjects } from '@/lib/api-client';
 
-// Mock data - replace with real API calls
-const mockProjects = [
-  {
-    title: 'Neon District',
-    creator: 'Maya Chen',
-    role: '3D Artist',
-    image: getProjectPlaceholder('Neon District'),
-    likes: '2.4k',
-    views: '8.2k',
-  },
-  {
-    title: 'Quantum Interface',
-    creator: 'Alex Rodriguez',
-    role: 'UI Designer',
-    image: getProjectPlaceholder('Quantum Interface'),
-    likes: '1.8k',
-    views: '5.6k',
-  },
-  {
-    title: 'Pixel Paradise',
-    creator: 'Jordan Lee',
-    role: '3D Artist',
-    image: getProjectPlaceholder('Pixel Paradise'),
-    likes: '3.1k',
-    views: '9.4k',
-  },
-];
+interface Developer {
+  id: string;
+  displayName: string;
+  username: string;
+  profilePictureUrl: string;
+  tagline: string;
+  primaryRole: string;
+  availability: string;
+  projectCount: number;
+}
 
-const mockCreators = [
-  {
-    initials: 'MC',
-    name: 'Maya Chen',
-    handle: 'mayabuilds',
-    role: '3D Environment Artist',
-    skills: ['Blender', 'Lighting', 'Modeling'],
-    followers: '4.8k',
-    rate: '$150/hr',
-    color: 'bg-gradient-to-br from-emerald-300 to-cyan-700',
-  },
-  {
-    initials: 'AR',
-    name: 'Alex Rodriguez',
-    handle: 'alexrodev',
-    role: 'UI/UX Designer',
-    skills: ['Figma', 'Animation', 'Systems'],
-    followers: '3.2k',
-    rate: '$125/hr',
-    color: 'bg-gradient-to-br from-blue-300 to-purple-600',
-  },
-  {
-    initials: 'JL',
-    name: 'Jordan Lee',
-    handle: 'jordanscript',
-    role: 'Scripter',
-    skills: ['Lua', 'Architecture', 'Optimization'],
-    followers: '5.1k',
-    rate: '$140/hr',
-    color: 'bg-gradient-to-br from-pink-300 to-rose-600',
-  },
-  {
-    initials: 'SA',
-    name: 'Sam Ahmed',
-    handle: 'samvfx',
-    role: 'VFX Artist',
-    skills: ['Particles', 'Animation', 'Tools'],
-    followers: '2.8k',
-    rate: '$130/hr',
-    color: 'bg-gradient-to-br from-yellow-300 to-orange-600',
-  },
+interface Project {
+  id: string;
+  userId: string;
+  title: string;
+  shortDescription: string;
+  thumbnailUrl: string;
+  user: {
+    displayName: string;
+    username: string;
+    primaryRole: string;
+  };
+}
+
+const colorGradients = [
+  'bg-gradient-to-br from-emerald-300 to-cyan-700',
+  'bg-gradient-to-br from-blue-300 to-purple-600',
+  'bg-gradient-to-br from-pink-300 to-rose-600',
+  'bg-gradient-to-br from-yellow-300 to-orange-600',
+  'bg-gradient-to-br from-violet-300 to-indigo-600',
 ];
 
 export default function HomePage() {
   const [role, setRole] = useState('All roles');
+  const [developers, setDevelopers] = useState<Developer[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [featuredProject, setFeaturedProject] = useState<Project | null>(null);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoading(true);
+        const [devs, prods] = await Promise.all([
+          getFeaturedDevelopers().catch(() => []),
+          browseProjects({ limit: 6, sort: 'newest' })
+            .then((res) => res.data || [])
+            .catch(() => []),
+        ]);
+
+        setDevelopers(devs || []);
+        setProjects(prods || []);
+        if (prods && prods.length > 0) {
+          setFeaturedProject(prods[0]);
+        }
+      } catch (err) {
+        console.error('Failed to load homepage data:', err);
+        setError('Failed to load data');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  // Convert API developers to CreatorCard format
+  const creatorsForDisplay = developers.map((dev, idx) => ({
+    initials: dev.displayName.substring(0, 2).toUpperCase(),
+    name: dev.displayName,
+    handle: dev.username,
+    role: dev.primaryRole || 'Creator',
+    skills: dev.primaryRole ? [dev.primaryRole] : ['Roblox'],
+    followers: `${dev.projectCount}`,
+    rate: 'Contact for rates',
+    color: colorGradients[idx % colorGradients.length],
+  }));
+
+  // Convert API projects to ProjectCard format
+  const projectsForDisplay = projects.map((proj) => ({
+    title: proj.title,
+    creator: proj.user?.displayName || 'Unknown',
+    role: proj.user?.primaryRole || 'Creator',
+    image: proj.thumbnailUrl || getProjectPlaceholder(proj.title),
+    likes: '0',
+    views: '0',
+  }));
 
   return (
     <>
@@ -123,11 +140,11 @@ export default function HomePage() {
             </div>
             <div className="mt-10 flex flex-wrap gap-7 text-xs text-white/35">
               <span>
-                <strong className="block font-display text-xl text-white">12.8k</strong>
+                <strong className="block font-display text-xl text-white">{developers.length || '12.8k'}</strong>
                 creators
               </span>
               <span>
-                <strong className="block font-display text-xl text-white">31k</strong>
+                <strong className="block font-display text-xl text-white">{projects.length || '31k'}</strong>
                 projects shared
               </span>
               <span>
@@ -140,8 +157,8 @@ export default function HomePage() {
             <div className="absolute -inset-6 rounded-[2rem] bg-[#b7ff3c]/8 blur-3xl" />
             <div className="relative rotate-1 overflow-hidden rounded-3xl border border-white/15 bg-[#0d120f] p-2 shadow-2xl transition hover:rotate-0">
               <img
-                src={getProjectPlaceholder('Neon District')}
-                alt="Featured neon environment project"
+                src={featuredProject?.thumbnailUrl || getProjectPlaceholder('Featured Project')}
+                alt="Featured project"
                 className="aspect-[4/3] w-full rounded-[1.15rem] object-cover saturate-[.7]"
               />
               <div className="absolute inset-x-2 bottom-2 rounded-b-[1.15rem] bg-gradient-to-t from-black via-black/80 to-transparent px-5 pb-5 pt-24">
@@ -150,8 +167,12 @@ export default function HomePage() {
                     <span className="text-[10px] font-bold uppercase tracking-widest text-[#b7ff3c]">
                       Featured build
                     </span>
-                    <h2 className="mt-1 font-display text-2xl font-bold">Neon District</h2>
-                    <p className="mt-1 text-xs text-white/45">Environment by Maya Chen</p>
+                    <h2 className="mt-1 font-display text-2xl font-bold">
+                      {featuredProject?.title || 'Neon District'}
+                    </h2>
+                    <p className="mt-1 text-xs text-white/45">
+                      Environment by {featuredProject?.user?.displayName || 'Maya Chen'}
+                    </p>
                   </div>
                   <div className="flex items-center gap-1 text-xs">
                     <Heart size={14} className="text-[#b7ff3c]" /> 2.4k
@@ -194,11 +215,23 @@ export default function HomePage() {
             </button>
           ))}
         </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {mockProjects.slice(0, 3).map((p, i) => (
-            <ProjectCard key={p.title} project={p} large={i === 0} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <Loader className="animate-spin" size={24} />
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 text-red-400">{error}</div>
+        ) : projects.length > 0 ? (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {projectsForDisplay.slice(0, 3).map((p, i) => (
+              <ProjectCard key={p.title} project={p} large={i === 0} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-white/50">
+            No projects found. Be the first to share!
+          </div>
+        )}
       </section>
 
       {/* Creators to Watch Section */}
@@ -209,11 +242,21 @@ export default function HomePage() {
             title="Talent, not titles."
             action="View all creators"
           />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {mockCreators.map((c) => (
-              <CreatorCard key={c.handle} creator={c} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader className="animate-spin" size={24} />
+            </div>
+          ) : developers.length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {creatorsForDisplay.map((c) => (
+                <CreatorCard key={c.handle} creator={c} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-white/50">
+              No developers found yet. Check back soon!
+            </div>
+          )}
         </div>
       </section>
 

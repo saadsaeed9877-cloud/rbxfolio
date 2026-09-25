@@ -1,91 +1,81 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { Search, SlidersHorizontal, Filter } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Search, SlidersHorizontal, Filter, Loader } from 'lucide-react';
 import { PageHero, CreatorCard } from '@/components/design-system';
+import { searchDevelopers } from '@/lib/api-client';
 
-// Mock data - replace with real API calls
-const mockCreators = [
-  {
-    initials: 'MC',
-    name: 'Maya Chen',
-    handle: 'mayabuilds',
-    role: '3D Environment Artist',
-    skills: ['Blender', 'Lighting', 'Modeling'],
-    followers: '4.8k',
-    rate: '$150/hr',
-    color: 'bg-gradient-to-br from-emerald-300 to-cyan-700',
-  },
-  {
-    initials: 'AR',
-    name: 'Alex Rodriguez',
-    handle: 'alexrodev',
-    role: 'UI/UX Designer',
-    skills: ['Figma', 'Animation', 'Systems'],
-    followers: '3.2k',
-    rate: '$125/hr',
-    color: 'bg-gradient-to-br from-blue-300 to-purple-600',
-  },
-  {
-    initials: 'JL',
-    name: 'Jordan Lee',
-    handle: 'jordanscript',
-    role: 'Scripter',
-    skills: ['Lua', 'Architecture', 'Optimization'],
-    followers: '5.1k',
-    rate: '$140/hr',
-    color: 'bg-gradient-to-br from-pink-300 to-rose-600',
-  },
-  {
-    initials: 'SA',
-    name: 'Sam Ahmed',
-    handle: 'samvfx',
-    role: 'VFX Artist',
-    skills: ['Particles', 'Animation', 'Tools'],
-    followers: '2.8k',
-    rate: '$130/hr',
-    color: 'bg-gradient-to-br from-yellow-300 to-orange-600',
-  },
-  {
-    initials: 'RP',
-    name: 'Riley Park',
-    handle: 'rileydev',
-    role: 'Full-Stack Developer',
-    skills: ['Lua', 'TypeScript', 'Optimization'],
-    followers: '3.8k',
-    rate: '$160/hr',
-    color: 'bg-gradient-to-br from-violet-300 to-indigo-600',
-  },
-  {
-    initials: 'CM',
-    name: 'Casey Morgan',
-    handle: 'caseyart',
-    role: 'Concept Artist',
-    skills: ['Conceptualization', 'Design', 'Modeling'],
-    followers: '2.5k',
-    rate: '$120/hr',
-    color: 'bg-gradient-to-br from-red-300 to-pink-600',
-  },
-];
+interface Developer {
+  id: string;
+  displayName: string;
+  username: string;
+  profilePictureUrl: string;
+  tagline: string;
+  primaryRole: string;
+  availability: string;
+  projectCount: number;
+}
 
 const roles = ['All roles', 'Scripter', '3D Artist', 'UI Designer', 'VFX Artist'];
+const colorGradients = [
+  'bg-gradient-to-br from-emerald-300 to-cyan-700',
+  'bg-gradient-to-br from-blue-300 to-purple-600',
+  'bg-gradient-to-br from-pink-300 to-rose-600',
+  'bg-gradient-to-br from-yellow-300 to-orange-600',
+  'bg-gradient-to-br from-violet-300 to-indigo-600',
+  'bg-gradient-to-br from-red-300 to-pink-600',
+];
 
 export default function TalentPage() {
   const [query, setQuery] = useState('');
   const [activeRole, setActiveRole] = useState('All roles');
+  const [allDevelopers, setAllDevelopers] = useState<Developer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Load developers on component mount
+  useEffect(() => {
+    async function loadDevelopers() {
+      try {
+        setLoading(true);
+        const result = await searchDevelopers({ limit: 100 });
+        setAllDevelopers(result.data || []);
+      } catch (err) {
+        console.error('Failed to load developers:', err);
+        setError('Failed to load developers');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDevelopers();
+  }, []);
+
+  // Filter developers locally based on search and role
   const filtered = useMemo(() => {
-    return mockCreators.filter((c) => {
+    return allDevelopers.filter((dev) => {
       const matchesRole =
         activeRole === 'All roles' ||
-        c.role.toLowerCase().includes(activeRole.toLowerCase());
+        dev.primaryRole?.toLowerCase().includes(activeRole.toLowerCase());
       const matchesQuery =
-        `${c.name} ${c.role} ${c.skills.join(' ')}`
+        `${dev.displayName} ${dev.primaryRole} ${dev.tagline}`
           .toLowerCase()
           .includes(query.toLowerCase());
       return matchesRole && matchesQuery;
     });
-  }, [query, activeRole]);
+  }, [query, activeRole, allDevelopers]);
+
+  // Convert API developers to CreatorCard format
+  const creatorsForDisplay = filtered.map((dev, idx) => ({
+    initials: dev.displayName.substring(0, 2).toUpperCase(),
+    name: dev.displayName,
+    handle: dev.username,
+    role: dev.primaryRole || 'Creator',
+    skills: dev.primaryRole ? [dev.primaryRole] : ['Roblox'],
+    followers: `${dev.projectCount}`,
+    rate: 'Contact for rates',
+    color: colorGradients[idx % colorGradients.length],
+  }));
 
   return (
     <>
@@ -124,23 +114,34 @@ export default function TalentPage() {
             <SlidersHorizontal size={15} /> Filters
           </button>
         </div>
-        <div className="mb-6 mt-10 flex items-center justify-between">
-          <p className="text-sm text-white/40">
-            <strong className="text-white">{filtered.length}</strong> creators found
-          </p>
-          <button className="flex items-center gap-2 text-xs text-white/40">
-            Recommended <Filter size={14} />
-          </button>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {filtered.map((c) => (
-            <CreatorCard key={c.handle} creator={c} />
-          ))}
-        </div>
-        {!filtered.length && (
-          <div className="py-24 text-center text-white/35">
-            No creators match those filters.
+
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <Loader className="animate-spin" size={24} />
           </div>
+        ) : error ? (
+          <div className="text-center py-12 text-red-400">{error}</div>
+        ) : (
+          <>
+            <div className="mb-6 mt-10 flex items-center justify-between">
+              <p className="text-sm text-white/40">
+                <strong className="text-white">{filtered.length}</strong> creators found
+              </p>
+              <button className="flex items-center gap-2 text-xs text-white/40">
+                Recommended <Filter size={14} />
+              </button>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {creatorsForDisplay.map((c) => (
+                <CreatorCard key={c.handle} creator={c} />
+              ))}
+            </div>
+            {!filtered.length && (
+              <div className="py-24 text-center text-white/35">
+                No creators match those filters.
+              </div>
+            )}
+          </>
         )}
       </section>
     </>

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import {
   BadgeCheck,
   Heart,
@@ -9,67 +10,125 @@ import {
   MapPin,
   Users,
   Eye,
+  Loader,
 } from 'lucide-react';
 import { ProjectCard } from '@/components/design-system';
 import { getProjectPlaceholder, getBannerPlaceholder } from '@/lib/placeholders';
+import { getUserProfile, getUserProjects } from '@/lib/api-client';
 
-// Mock profile data - replace with real API calls
-const mockProfile = {
-  initials: 'MC',
-  name: 'Maya Chen',
-  handle: 'mayabuilds',
-  verified: true,
-  role: '3D Environment Artist',
-  bio: 'I build atmospheric worlds for Roblox experiences, with a focus on stylized lighting, modular environments, and spaces that tell a story before the player does anything.',
-  location: 'Toronto, Canada',
-  followers: '4.8k',
-  availability: 'Available for work',
-  following: false,
-  skills: [
-    'Blender',
-    'Roblox Studio',
-    'Substance',
-    'Lighting',
-    'Low-poly',
-    'Optimization',
-  ],
-  reputation: {
-    projects: '12',
-    rating: '4.9',
-    response: '98%',
-  },
-  bannerImage: getBannerPlaceholder('Maya Chen'),
-  avatarColor: 'bg-gradient-to-br from-emerald-300 to-cyan-700',
-  projects: [
-    {
-      title: 'Neon District',
-      creator: 'Maya Chen',
-      role: '3D Artist',
-      image: getProjectPlaceholder('Neon District'),
-      likes: '2.4k',
-      views: '8.2k',
-    },
-    {
-      title: 'Quantum Interface',
-      creator: 'Maya Chen',
-      role: 'UI Designer',
-      image: getProjectPlaceholder('Quantum Interface'),
-      likes: '1.8k',
-      views: '5.6k',
-    },
-  ],
-};
+interface UserProfile {
+  userId: string;
+  displayName: string;
+  username: string;
+  profilePictureUrl: string;
+  bannerUrl: string;
+  tagline: string;
+  bio: string;
+  primaryRole: string;
+  secondaryRoles: string[];
+  experienceLevel: string;
+  location: string;
+  languages: string[];
+  socialLinks: Record<string, string>;
+  availability: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Project {
+  id: string;
+  userId: string;
+  title: string;
+  slug: string;
+  shortDescription: string;
+  detailedDescription: string;
+  thumbnailUrl: string;
+  completionStatus: string;
+  tags: Array<{ id: string; name: string }>;
+  _count: {
+    media: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+const colorGradients = [
+  'bg-gradient-to-br from-emerald-300 to-cyan-700',
+  'bg-gradient-to-br from-blue-300 to-purple-600',
+  'bg-gradient-to-br from-pink-300 to-rose-600',
+  'bg-gradient-to-br from-yellow-300 to-orange-600',
+  'bg-gradient-to-br from-violet-300 to-indigo-600',
+];
 
 export default function PublicProfilePage() {
+  const params = useParams();
+  const username = params.username as string;
+  
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [following, setFollowing] = useState(false);
   const [tab, setTab] = useState('Work');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadProfileData() {
+      try {
+        setLoading(true);
+        const [userProfile, userProjects] = await Promise.all([
+          getUserProfile(username),
+          getUserProjects(username),
+        ]);
+        setProfile(userProfile);
+        setProjects(userProjects || []);
+      } catch (err) {
+        console.error('Failed to load profile:', err);
+        setError('Failed to load profile');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (username) {
+      loadProfileData();
+    }
+  }, [username]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-24">
+        <Loader className="animate-spin" size={24} />
+      </div>
+    );
+  }
+
+  if (error || !profile) {
+    return (
+      <div className="mx-auto max-w-[1180px] px-5 py-12 text-center">
+        <p className="text-red-400">{error || 'Profile not found'}</p>
+      </div>
+    );
+  }
+
+  const initials = profile.displayName.substring(0, 2).toUpperCase();
+  const avatarColor = colorGradients[Math.floor(Math.random() * colorGradients.length)];
+
+  // Convert API projects to ProjectCard format
+  const projectsForDisplay = projects.map((proj) => ({
+    title: proj.title,
+    creator: profile.displayName,
+    role: profile.primaryRole || 'Creator',
+    image: proj.thumbnailUrl || getProjectPlaceholder(proj.title),
+    likes: '0',
+    views: '0',
+  }));
 
   return (
     <>
       {/* Banner */}
       <section className="relative h-48 overflow-hidden md:h-72">
         <img
-          src={mockProfile.bannerImage}
+          src={profile.bannerUrl || getBannerPlaceholder(profile.displayName)}
           alt="Profile banner"
           className="h-full w-full object-cover opacity-50 saturate-50"
         />
@@ -80,19 +139,16 @@ export default function PublicProfilePage() {
       <section className="relative mx-auto max-w-[1180px] px-5">
         <div className="-mt-16 flex flex-col gap-5 border-b border-white/8 pb-8 sm:flex-row sm:items-end">
           <div
-            className={`grid size-28 shrink-0 place-items-center rounded-3xl border-4 border-[#070a08] ${mockProfile.avatarColor} font-display text-2xl font-black text-black shadow-xl`}
+            className={`grid size-28 shrink-0 place-items-center rounded-3xl border-4 border-[#070a08] ${avatarColor} font-display text-2xl font-black text-black shadow-xl`}
           >
-            {mockProfile.initials}
+            {initials}
           </div>
           <div className="flex-1 pb-1">
             <div className="flex items-center gap-2">
-              <h1 className="font-display text-3xl font-bold">{mockProfile.name}</h1>
-              {mockProfile.verified && (
-                <BadgeCheck size={20} className="text-[#b7ff3c]" />
-              )}
+              <h1 className="font-display text-3xl font-bold">{profile.displayName}</h1>
             </div>
             <p className="mt-1 text-sm text-white/35">
-              @{mockProfile.handle} · {mockProfile.role}
+              @{profile.username} · {profile.primaryRole || 'Creator'}
             </p>
           </div>
           <div className="flex gap-2">
@@ -107,7 +163,7 @@ export default function PublicProfilePage() {
                   : 'bg-[#b7ff3c] text-black'
               }`}
             >
-              {following ? 'Following' : `Follow ${mockProfile.name.split(' ')[0]}`}
+              {following ? 'Following' : `Follow ${profile.displayName.split(' ')[0]}`}
             </button>
           </div>
         </div>
@@ -116,26 +172,28 @@ export default function PublicProfilePage() {
           {/* Main Content */}
           <div>
             <p className="max-w-2xl text-base leading-7 text-white/65">
-              {mockProfile.bio}
+              {profile.bio || profile.tagline}
             </p>
             <div className="mt-5 flex flex-wrap gap-5 text-xs text-white/35">
-              <span className="flex items-center gap-1.5">
-                <MapPin size={14} />
-                {mockProfile.location}
-              </span>
+              {profile.location && (
+                <span className="flex items-center gap-1.5">
+                  <MapPin size={14} />
+                  {profile.location}
+                </span>
+              )}
               <span className="flex items-center gap-1.5">
                 <Users size={14} />
-                <strong className="text-white">{mockProfile.followers}</strong> followers
+                <strong className="text-white">{projects.length}</strong> projects
               </span>
               <span className="flex items-center gap-1.5">
                 <Eye size={14} />
-                {mockProfile.availability}
+                {profile.availability}
               </span>
             </div>
 
             {/* Tabs */}
             <div className="mt-10 flex gap-7 border-b border-white/8">
-              {['Work', 'About', 'Appreciations'].map((t) => (
+              {['Work', 'About', 'Details'].map((t) => (
                 <button
                   onClick={() => setTab(t)}
                   key={t}
@@ -152,84 +210,102 @@ export default function PublicProfilePage() {
 
             {/* Tab Content */}
             {tab === 'Work' && (
-              <div className="mt-5 grid gap-4 md:grid-cols-2">
-                {mockProfile.projects.map((p) => (
-                  <ProjectCard key={p.title} project={p} />
-                ))}
+              <div className="mt-5">
+                {projects.length > 0 ? (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {projectsForDisplay.map((p) => (
+                      <ProjectCard key={p.title} project={p} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-white/8 bg-[#0c110d] p-10 text-center text-sm text-white/40">
+                    No projects shared yet.
+                  </div>
+                )}
               </div>
             )}
             {tab === 'About' && (
               <div className="mt-6 rounded-2xl border border-white/8 bg-[#0c110d] p-6 text-sm leading-7 text-white/50">
-                Maya has shipped environments for 12 Roblox experiences and
-                contributed to games with more than 80 million combined visits.
-                Her process spans blockout, modeling, UV work, texturing,
-                lighting, and in-Studio optimization.
+                {profile.bio || (
+                  <>
+                    <p>{profile.displayName} is a {profile.primaryRole || 'creator'} on RbxFolio.</p>
+                    {profile.experienceLevel && (
+                      <p className="mt-3">Experience Level: {profile.experienceLevel}</p>
+                    )}
+                    {profile.languages && profile.languages.length > 0 && (
+                      <p className="mt-3">Languages: {profile.languages.join(', ')}</p>
+                    )}
+                  </>
+                )}
               </div>
             )}
-            {tab === 'Appreciations' && (
-              <div className="mt-6 rounded-2xl border border-white/8 bg-[#0c110d] p-10 text-center text-sm text-white/40">
-                <Heart className="mx-auto mb-3 text-[#b7ff3c]" />
-                2,409 appreciations across Maya&apos;s work.
+            {tab === 'Details' && (
+              <div className="mt-6 space-y-4">
+                {profile.primaryRole && (
+                  <div className="rounded-2xl border border-white/8 bg-[#0c110d] p-5">
+                    <h4 className="font-display font-bold">Primary Role</h4>
+                    <p className="mt-2 text-sm text-white/50">{profile.primaryRole}</p>
+                  </div>
+                )}
+                {profile.secondaryRoles && profile.secondaryRoles.length > 0 && (
+                  <div className="rounded-2xl border border-white/8 bg-[#0c110d] p-5">
+                    <h4 className="font-display font-bold">Other Roles</h4>
+                    <p className="mt-2 text-sm text-white/50">{profile.secondaryRoles.join(', ')}</p>
+                  </div>
+                )}
+                {profile.experienceLevel && (
+                  <div className="rounded-2xl border border-white/8 bg-[#0c110d] p-5">
+                    <h4 className="font-display font-bold">Experience</h4>
+                    <p className="mt-2 text-sm text-white/50">{profile.experienceLevel}</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
 
           {/* Sidebar */}
           <aside className="space-y-4">
-            <div className="rounded-2xl border border-white/8 bg-[#0c110d] p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="font-display font-bold">Open to work</h3>
-                <span className="size-2 rounded-full bg-[#b7ff3c] shadow-[0_0_8px_#b7ff3c]" />
+            {profile.availability === 'OPEN' && (
+              <div className="rounded-2xl border border-white/8 bg-[#0c110d] p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="font-display font-bold">Open to work</h3>
+                  <span className="size-2 rounded-full bg-[#b7ff3c] shadow-[0_0_8px_#b7ff3c]" />
+                </div>
+                <p className="text-xs leading-5 text-white/40">
+                  {profile.tagline || 'Available for new projects and collaborations.'}
+                </p>
+                <button className="mt-5 w-full rounded-xl bg-[#b7ff3c] py-3 text-xs font-bold text-black hover:bg-[#c6ff65] transition">
+                  Start a conversation
+                </button>
               </div>
-              <p className="text-xs leading-5 text-white/40">
-                Environment art, lighting, and world building for short or
-                long-term projects.
-              </p>
-              <button className="mt-5 w-full rounded-xl bg-[#b7ff3c] py-3 text-xs font-bold text-black hover:bg-[#c6ff65] transition">
-                Start a conversation
-              </button>
-            </div>
+            )}
 
-            <div className="rounded-2xl border border-white/8 bg-[#0c110d] p-5">
-              <h3 className="font-display font-bold">Core skills</h3>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {mockProfile.skills.map((s) => (
-                  <span
-                    key={s}
-                    className="rounded-lg border border-white/8 px-2.5 py-1.5 text-[10px] text-white/45"
-                  >
-                    {s}
+            {profile.primaryRole && (
+              <div className="rounded-2xl border border-white/8 bg-[#0c110d] p-5">
+                <h3 className="font-display font-bold">Specialization</h3>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <span className="rounded-lg border border-white/8 px-2.5 py-1.5 text-[10px] text-white/45">
+                    {profile.primaryRole}
                   </span>
-                ))}
+                  {profile.secondaryRoles?.map((role) => (
+                    <span key={role} className="rounded-lg border border-white/8 px-2.5 py-1.5 text-[10px] text-white/45">
+                      {role}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="rounded-2xl border border-white/8 bg-[#0c110d] p-5">
-              <h3 className="font-display font-bold">Reputation</h3>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+              <h3 className="font-display font-bold">Profile Stats</h3>
+              <div className="mt-4 grid grid-cols-2 gap-2 text-center">
                 <span>
-                  <strong className="block text-lg">
-                    {mockProfile.reputation.projects}
-                  </strong>
-                  <small className="text-[9px] uppercase text-white/30">
-                    Projects
-                  </small>
+                  <strong className="block text-lg">{projects.length}</strong>
+                  <small className="text-[9px] uppercase text-white/30">Projects</small>
                 </span>
                 <span>
-                  <strong className="block text-lg">
-                    {mockProfile.reputation.rating}
-                  </strong>
-                  <small className="text-[9px] uppercase text-white/30">
-                    Rating
-                  </small>
-                </span>
-                <span>
-                  <strong className="block text-lg">
-                    {mockProfile.reputation.response}
-                  </strong>
-                  <small className="text-[9px] uppercase text-white/30">
-                    Response
-                  </small>
+                  <strong className="block text-lg">{profile.languages?.length || 0}</strong>
+                  <small className="text-[9px] uppercase text-white/30">Languages</small>
                 </span>
               </div>
             </div>
