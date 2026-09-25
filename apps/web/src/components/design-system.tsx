@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -40,7 +40,6 @@ export const COLORS = {
 const navItems = [
   { label: 'Explore', href: '/', icon: Compass },
   { label: 'Talent', href: '/talent', icon: UserRound },
-  { label: 'Jobs', href: '/jobs', icon: BriefcaseBusiness },
   { label: 'Projects', href: '/browse', icon: Box },
 ];
 
@@ -49,7 +48,32 @@ const navItems = [
  */
 export function Shell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<{ displayName?: string } | null>(null);
+  const [loading, setLoading] = useState(true);
   const pathname = usePathname();
+
+  useEffect(() => {
+    async function checkSession() {
+      try {
+        const response = await fetch('/api/auth/session', {
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const session = await response.json();
+          setUser(session?.user || null);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Failed to check session:', error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    checkSession();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#070a08] text-[#f4f7f4]">
@@ -102,16 +126,27 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Bell size={19} />
           </button>
 
-          <Link
-            href="/u/profile"
-            className="hidden items-center gap-2 rounded-xl border border-white/10 bg-white/[.04] px-2 py-1.5 text-sm font-semibold sm:flex"
-          >
-            <span className="grid size-7 place-items-center rounded-lg bg-gradient-to-br from-[#b7ff3c] to-emerald-700 text-[10px] font-bold text-black">
-              OX
-            </span>
-            Profile
-            <ChevronDown size={14} className="text-white/35" />
-          </Link>
+          {!loading && user && (
+            <Link
+              href="/u/profile"
+              className="hidden items-center gap-2 rounded-xl border border-white/10 bg-white/[.04] px-2 py-1.5 text-sm font-semibold sm:flex"
+            >
+              <span className="grid size-7 place-items-center rounded-lg bg-gradient-to-br from-[#b7ff3c] to-emerald-700 text-[10px] font-bold text-black">
+                {user.displayName?.substring(0, 2).toUpperCase() || 'OX'}
+              </span>
+              Profile
+              <ChevronDown size={14} className="text-white/35" />
+            </Link>
+          )}
+
+          {!loading && !user && (
+            <Link
+              href="/login"
+              className="hidden items-center gap-2 rounded-xl bg-[#b7ff3c] px-4 py-1.5 text-sm font-semibold text-black hover:bg-[#c6ff65] sm:flex"
+            >
+              Sign in
+            </Link>
+          )}
 
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
